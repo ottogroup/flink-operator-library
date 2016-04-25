@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ottogroup.bi.streaming.testing;
+package com.ottogroup.bi.streaming.operator.testing;
 
 import java.util.Date;
 

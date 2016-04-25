@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ottogroup.bi.streaming.testing;
+package com.ottogroup.bi.streaming.operator.testing;
 
 import java.text.SimpleDateFormat;
 
@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 
 import com.ottogroup.bi.streaming.operator.json.JsonContentReference;
 import com.ottogroup.bi.streaming.operator.json.JsonContentType;
+import com.ottogroup.bi.streaming.operator.testing.JSONFieldContentMatcher;
 
 /**
  * Test case for {@link JSONFieldContentMatcher}
