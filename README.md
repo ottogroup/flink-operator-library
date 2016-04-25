@@ -1,2 +1,3 @@
 # flink-operator-library
-Collection of generic Apache Flink operators
+
+The library provides a collection of generic Apache Flink operators.   
