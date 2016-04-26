@@ -43,8 +43,10 @@ public class MatchJSONContent extends MatchRecords<JSONObject> {
 	 * 			Matcher applied to the content
 	 * @return
 	 * 			True or false indicating whether the content evaluates to true when applied to the matcher
+	 * @throws IllegalArgumentException
+	 * 			Thrown in case a required input is missing
 	 */
-	public MatchJSONContent assertString(final String path, final Matcher<? extends String> matcher) {
+	public MatchJSONContent assertString(final String path, final Matcher<? extends String> matcher) throws IllegalArgumentException {
 		////////////////////////////////////////////////
 		// validate provided input
 		if(StringUtils.isBlank(path))
@@ -66,8 +68,10 @@ public class MatchJSONContent extends MatchRecords<JSONObject> {
 	 * 			Matcher applied to the content
 	 * @return
 	 * 			True or false indicating whether the content evaluates to true when applied to the matcher
+	 * @throws IllegalArgumentException
+	 * 			Thrown in case a required input is missing
 	 */
-	public MatchJSONContent assertInteger(final String path, final Matcher<? extends Integer> matcher) {
+	public MatchJSONContent assertInteger(final String path, final Matcher<? extends Integer> matcher) throws IllegalArgumentException {
 		////////////////////////////////////////////////
 		// validate provided input
 		if(StringUtils.isBlank(path))
@@ -89,8 +93,10 @@ public class MatchJSONContent extends MatchRecords<JSONObject> {
 	 * 			Matcher applied to the content
 	 * @return
 	 * 			True or false indicating whether the content evaluates to true when applied to the matcher
+	 * @throws IllegalArgumentException
+	 * 			Thrown in case a required input is missing
 	 */
-	public MatchJSONContent assertBoolean(final String path, final Matcher<? extends Boolean> matcher) {
+	public MatchJSONContent assertBoolean(final String path, final Matcher<? extends Boolean> matcher) throws IllegalArgumentException {
 		////////////////////////////////////////////////
 		// validate provided input
 		if(StringUtils.isBlank(path))
@@ -112,8 +118,10 @@ public class MatchJSONContent extends MatchRecords<JSONObject> {
 	 * 			Matcher applied to the content
 	 * @return
 	 * 			True or false indicating whether the content evaluates to true when applied to the matcher
+	 * @throws IllegalArgumentException
+	 * 			Thrown in case a required input is missing
 	 */
-	public MatchJSONContent assertDouble(final String path, final Matcher<? extends Double> matcher) {
+	public MatchJSONContent assertDouble(final String path, final Matcher<? extends Double> matcher) throws IllegalArgumentException {
 		////////////////////////////////////////////////
 		// validate provided input
 		if(StringUtils.isBlank(path))
@@ -137,8 +145,10 @@ public class MatchJSONContent extends MatchRecords<JSONObject> {
 	 * 			Matcher applied to the content
 	 * @return
 	 * 			True or false indicating whether the content evaluates to true when applied to the matcher
+	 * @throws IllegalArgumentException
+	 * 			Thrown in case a required input is missing
 	 */
-	public MatchJSONContent assertTimestamp(final String path, final String formatString, final Matcher<? extends Date> matcher) {
+	public MatchJSONContent assertTimestamp(final String path, final String formatString, final Matcher<? extends Date> matcher) throws IllegalArgumentException {
 		////////////////////////////////////////////////
 		// validate provided input
 		if(StringUtils.isBlank(path))
