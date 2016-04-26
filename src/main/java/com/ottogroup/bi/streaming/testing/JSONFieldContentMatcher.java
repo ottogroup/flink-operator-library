@@ -130,7 +130,7 @@ public class JSONFieldContentMatcher extends TypeSafeDiagnosingMatcher<JSONObjec
 				mismatchDescription.appendText(")");
 			}
 			return result;
-		} catch (IllegalArgumentException | NoSuchElementException | JSONException | ParseException e) {
+		} catch (Exception e) {
 			mismatchDescription.appendText("[content extraction failed: "+e.getMessage()+"]");
 			return false;
 		}
