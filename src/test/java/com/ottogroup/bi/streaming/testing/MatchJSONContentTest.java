@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ottogroup.bi.streaming.operator.testing;
+package com.ottogroup.bi.streaming.testing;
 
 import java.text.SimpleDateFormat;
 
@@ -22,7 +22,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import com.ottogroup.bi.streaming.operator.testing.MatchJSONContent;
+import com.ottogroup.bi.streaming.testing.MatchJSONContent;
 
 /**
  * Test case for {@link MatchJSONContent}

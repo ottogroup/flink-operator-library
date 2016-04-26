@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ottogroup.bi.streaming.operator.testing;
+package com.ottogroup.bi.streaming.testing;
 
 import java.text.ParseException;
 import java.util.NoSuchElementException;

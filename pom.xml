@@ -37,7 +37,7 @@
   			<timezone>Europe/Berlin</timezone>
   		</developer>
   	</developers>
-
+	
 	<licenses>
 		<license>
 	    	<name>Apache License, Version 2.0</name>
@@ -57,6 +57,13 @@
     	<system>GitHub</system>
         <url>https://github.com/ottogroup/flink-operator-library/issues</url>
 	</issueManagement>
+	
+	<distributionManagement>
+		<repository>
+			<id>bintray-ottogroup-maven</id>
+			<url>https://api.bintray.com/maven/ottogroup/maven/flink-operator-library</url>
+		</repository>
+	</distributionManagement>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -200,7 +207,6 @@
     		<version>3.0.1</version>
 		</dependency>
 		<!-- end: data sink libraries -->
-
 	</dependencies>
 
 	<build>

@@ -90,7 +90,7 @@ public class JsonProcessingUtils implements Serializable {
 	/**
 	 * Extracts from a {@link JSONObject} the value of the field referenced by the provided path. The result may contain
 	 * any valid structure type contained inside the {@link JSONObject}, eg. {@link JSONObject} itself, {@link JSONArray} instances
-	 * or plain java types ({@link Integer}, {@link String}, ...) 
+	 * or plain java types ({@link Integer}, {@link String}, ...) represented as string
 	 * @param jsonObject
 	 * 			The {@link JSONObject} to read the value from (null is not permitted as input)
 	 * @param fieldPath
@@ -111,7 +111,7 @@ public class JsonProcessingUtils implements Serializable {
 	/**
 	 * Extracts from a {@link JSONObject} the value of the field referenced by the provided path. The result may contain
 	 * any valid structure type contained inside the {@link JSONObject}, eg. {@link JSONObject} itself, {@link JSONArray} instances
-	 * or plain java types ({@link Integer}, {@link String}, ...) 
+	 * or plain java types ({@link Integer}, {@link String}, ...) represented as string
 	 * @param jsonObject
 	 * 			The {@link JSONObject} to read the value from (null is not permitted as input)
 	 * @param fieldPath
@@ -512,8 +512,9 @@ public class JsonProcessingUtils implements Serializable {
 	 * @param value
 	 * @return
 	 * @throws JSONException
+	 * @throws IllegalArgumentException
 	 */
-	public JSONObject insertField(final JSONObject jsonObject, final String[] fieldPath, final Object value, final boolean override) throws JSONException {
+	public JSONObject insertField(final JSONObject jsonObject, final String[] fieldPath, final Object value, final boolean override) throws JSONException, IllegalArgumentException {
 		/////////////////////////////////////////////////////////////////////////
 		// validate provided input and throw exceptions if required
 		if(jsonObject == null)
