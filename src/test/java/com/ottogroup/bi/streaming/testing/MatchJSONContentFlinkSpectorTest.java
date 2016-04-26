@@ -15,8 +15,6 @@
  */
 package com.ottogroup.bi.streaming.testing;
 
-import java.util.Collection;
-
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;

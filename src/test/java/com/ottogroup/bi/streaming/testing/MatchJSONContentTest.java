@@ -22,8 +22,6 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import com.ottogroup.bi.streaming.testing.MatchJSONContent;
-
 /**
  * Test case for {@link MatchJSONContent}
  * @author mnxfst

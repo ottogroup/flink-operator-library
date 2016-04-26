@@ -29,7 +29,6 @@ import org.mockito.Mockito;
 
 import com.ottogroup.bi.streaming.operator.json.JsonContentReference;
 import com.ottogroup.bi.streaming.operator.json.JsonContentType;
-import com.ottogroup.bi.streaming.testing.JSONFieldContentMatcher;
 
 /**
  * Test case for {@link JSONFieldContentMatcher}

@@ -20,8 +20,6 @@ import java.io.Serializable;
 
 import org.apache.sling.commons.json.JSONObject;
 
-import com.ottogroup.bi.streaming.operator.json.JsonContentType;
-
 /**
  * Describes a reference into a {@link JSONObject} by providing a path as array of {@link String}
  * elements and the expected {@link JsonContentType}
