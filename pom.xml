@@ -75,8 +75,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<compiler.version>1.8</compiler.version>
-		<flink-version>0.10.1</flink-version>
-		<scala-version>_2.11</scala-version>
+		<flink-version>1.0.0</flink-version>
+		<scala-version>_2.10</scala-version>
 	</properties>
 	
 	<dependencies>	
@@ -151,7 +151,7 @@
 		
 		<dependency>
 			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-connector-kafka${scala-version}</artifactId>
+			<artifactId>flink-connector-kafka-0.8${scala-version}</artifactId>
 			<version>${flink-version}</version>
 		  	<exclusions>
 		  		<exclusion>
