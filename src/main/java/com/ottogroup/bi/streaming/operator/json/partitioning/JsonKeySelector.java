@@ -29,7 +29,7 @@ import com.ottogroup.bi.streaming.operator.json.JsonProcessingUtils;
  * @author mnxfst
  * @since 20.04.2016
  */
-public class JSONContentKeySelector implements KeySelector<JSONObject, String> {
+public class JsonKeySelector implements KeySelector<JSONObject, String> {
 
 	private static final long serialVersionUID = -1280949832025582748L;
 
@@ -40,7 +40,7 @@ public class JSONContentKeySelector implements KeySelector<JSONObject, String> {
 	 * Initializes the key selector using the provided input
 	 * @param ref
 	 */
-	public JSONContentKeySelector(final JsonContentReference ref) {
+	public JsonKeySelector(final JsonContentReference ref) {
 		///////////////////////////////////////////////////
 		// input validation
 		if(ref == null)

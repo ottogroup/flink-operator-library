@@ -26,64 +26,64 @@ import com.ottogroup.bi.streaming.operator.json.JsonContentReference;
 import com.ottogroup.bi.streaming.operator.json.JsonContentType;
 
 /**
- * Test case for {@link JSONContentKeySelector}
+ * Test case for {@link JsonKeySelector}
  * @author mnxfst
  * @since 20.04.2016
  */
-public class JSONContentKeySelectorTest {
+public class JsonKeySelectorTest {
 
 	/**
-	 * Test case for {@link JSONContentKeySelector#JSONPartitioningKeySelector(com.ottogroup.bi.streaming.operator.json.aggregate.JsonContentReference)}
+	 * Test case for {@link JsonKeySelector#JSONPartitioningKeySelector(com.ottogroup.bi.streaming.operator.json.aggregate.JsonContentReference)}
 	 * being provided null as input
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testConstructor_withNullReferenceInput() {
-		new JSONContentKeySelector(null);
+		new JsonKeySelector(null);
 	}
 
 	/**
-	 * Test case for {@link JSONContentKeySelector#JSONPartitioningKeySelector(com.ottogroup.bi.streaming.operator.json.aggregate.JsonContentReference)}
+	 * Test case for {@link JsonKeySelector#JSONPartitioningKeySelector(com.ottogroup.bi.streaming.operator.json.aggregate.JsonContentReference)}
 	 * being provided a reference showing a path value set to null
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testConstructor_withNullPathInfo() {
-		new JSONContentKeySelector(new JsonContentReference(null, JsonContentType.STRING));
+		new JsonKeySelector(new JsonContentReference(null, JsonContentType.STRING));
 	}
 
 	/**
-	 * Test case for {@link JSONContentKeySelector#JSONPartitioningKeySelector(com.ottogroup.bi.streaming.operator.json.aggregate.JsonContentReference)}
+	 * Test case for {@link JsonKeySelector#JSONPartitioningKeySelector(com.ottogroup.bi.streaming.operator.json.aggregate.JsonContentReference)}
 	 * being provided a reference showing a path value set to an empty array
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testConstructor_withEmptyPathInfo() {
-		new JSONContentKeySelector(new JsonContentReference(new String[0], JsonContentType.STRING));
+		new JsonKeySelector(new JsonContentReference(new String[0], JsonContentType.STRING));
 	}
 
 	/**
-	 * Test case for {@link JSONContentKeySelector#getKey(org.apache.sling.commons.json.JSONObject)} being provided null
+	 * Test case for {@link JsonKeySelector#getKey(org.apache.sling.commons.json.JSONObject)} being provided null
 	 */
 	@Test
 	public void testGetKey_withNullInput() throws Exception {
-		Assert.assertNull(new JSONContentKeySelector(new JsonContentReference(new String[]{"test"}, JsonContentType.STRING)).getKey(null));
+		Assert.assertNull(new JsonKeySelector(new JsonContentReference(new String[]{"test"}, JsonContentType.STRING)).getKey(null));
 	}
 
 	/**
-	 * Test case for {@link JSONContentKeySelector#getKey(org.apache.sling.commons.json.JSONObject)} being provided 
+	 * Test case for {@link JsonKeySelector#getKey(org.apache.sling.commons.json.JSONObject)} being provided 
 	 * a valid JSON object but misses the required location referenced inside configuration 
 	 */
 	@Test(expected=NoSuchElementException.class)
 	public void testGetKey_withValidInputButMissingReferencedLocation() throws Exception {
-		new JSONContentKeySelector(
+		new JsonKeySelector(
 				new JsonContentReference(new String[]{"test"}, JsonContentType.STRING, true)).getKey(new JSONObject("{\"key\":\"value\"}"));
 	}
 
 	/**
-	 * Test case for {@link JSONContentKeySelector#getKey(org.apache.sling.commons.json.JSONObject)} being provided 
+	 * Test case for {@link JsonKeySelector#getKey(org.apache.sling.commons.json.JSONObject)} being provided 
 	 * a valid JSON object holding the required location referenced inside configuration 
 	 */
 	@Test
 	public void testGetKey_withValidInputAndValueAtReferencedLocation() throws Exception {
-		Assert.assertEquals("value", new JSONContentKeySelector(
+		Assert.assertEquals("value", new JsonKeySelector(
 				new JsonContentReference(new String[]{"test"}, JsonContentType.STRING, true)).getKey(new JSONObject("{\"test\":\"value\"}")));
 	}
 	
