@@ -16,11 +16,7 @@
 
 package com.ottogroup.bi.streaming.testing;
 
-import java.text.ParseException;
-import java.util.NoSuchElementException;
-
 import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
