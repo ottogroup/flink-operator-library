@@ -34,38 +34,130 @@ import org.hamcrest.Matchers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ottogroup.bi.streaming.operator.json.JsonContentReference;
 import com.ottogroup.bi.streaming.operator.json.JsonContentType;
-import com.ottogroup.bi.streaming.operator.json.JsonProcessingUtils;
-import com.ottogroup.bi.streaming.operator.json.filter.cfg.ContentMatcher;
-import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldContentMatcherCombiner;
-import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldContentMatcherCombinerConfiguration;
-import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldContentMatcherConfiguration;
+import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldConditionOperator;
+import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldConditionCombiner;
+import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldConditionCombinerConfiguration;
+import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldConditionConfiguration;
 import com.ottogroup.bi.streaming.operator.json.filter.cfg.JsonContentFilterConfiguration;
 import com.ottogroup.bi.streaming.testing.MatchJSONContent;
 
 /**
- * Filters the content of incoming {@link JSONObject} for specific content. All non-matching messages
- * are refused from further processing, all matching messages get passed on to the next {@link Function}.
+ * Filters an incoming {@link JSONObject} for specific content. All non-matching messages are rejected, all messages 
+ * that evaluate to true are passed on to the next {@link Function} for further processing.
  * <br/><br/>
- * To configure a content filter instance the properties must show the following settings: (operator-name = name of this operator instance, id = enumeration value starting with value 1)
+ * Internally the filter is based on Hamcrest matchers {@link http://hamcrest.org} which allow to create pretty complex
+ * matcher hierarchies. The implementation tries to cover this complexity and provide features for creating filters like
  * <ul>
- *   <li><i>[operator-name].field.[id].path</i> - path to field (eg. data.wt.cs-host)</li>
- *   <li><i>[operator-name].field.[id].expression</i> - regular expression applied on field content (see {@linkplain http://en.wikipedia.org/wiki/Regular_expression} for more information)</li>
- *   <lI><i>[operator-name].field.[id].type</i> - string, numerical or boolean (required for content conversion and expression application: type-to-string)</li>
+ *   <li>messages must match <b>AT LEAST</b> two conditions of (A, B, C, D)</li>
+ *   <li>messages must match <b>AT MOST</b> two conditions of (A, B, C, D)</li>
+ *   <li>messages must match <b>EXACTLY</b> two conditions of (A, B, C, D)</li>
+ *   <li>messages must match <b>ALL</b> conditions of (A, B, C, D)</li>
+ *   <li>messages must match <b>ANY</b> conditions of (A, B, C, D) (similar to <i>must match at least one</i>)</li>
+ *   <li>any <b>AND</b> combined conditions of the examples shown above ((<b>AT LEAST</b> one of (A, B, C)) <b>AND</b> (<b>AT MOST</b> two of (C, D, E)))</li> 
+ * </ul> 
+ * Conditions are bound to selected fields referenced by a {@link JsonContentReference} located inside the {@link FieldConditionConfiguration}.<br/><br/>
+ * The filter configuration is split into two parts: field conditions and condition combiners. The first section lists conditions to be applied
+ * per field:
+ * <pre>
+ * { ...
+ *   "fieldConditions" : {
+ *    "f1" : {
+ *      "contentRef" : {
+ *        "path" : [ "path", "to", "element" ],
+ *        "contentType" : "STRING",
+ *        "conversionPattern" : null,
+ *        "required" : true
+ *      },
+ *      "operator" : "IS",
+ *      "value" : "test"
+ *    }   
+ *   }..
+ * }
+ * </pre>
+ * The example defines a condition to be applied on field {@code path.to.element} where it expects to find the value <i>test</i>. For example,
+ * the following JSON would evaluate to true
+ * <pre>
+ * {
+ *   "path": {
+ *     "to": {
+ *       "element": "test"
+ *     }
+ *   }
+ * }
+ * </pre>
+ * If a simple list of field conditions is provided, the filter assumes that <i>all</i> of them must hold for an incoming message in order to
+ * return true. <br/><br/>
+ * For further refinement the filter allows to combine a sub-set of conditions and assign specific requirements to that list, eg. all 
+ * conditions must hold or at least three of them (see above for more examples). The following JSON shows an example configuration:
+ * <pre>
+ * {
+ *   "fieldConditions" : {
+ *     "f1" : {
+ *       "contentRef" : {
+ *         "path" : [ "path", "to", "element" ],
+ *         "contentType" : "STRING",
+ *         "conversionPattern" : null,
+ *         "required" : true
+ *       },
+ *       "operator" : "IS",
+ *       "value" : "test"
+ *     },
+ *     "f2" : {
+ *       "contentRef" : {
+ *         "path" : [ "another", "path", "into", "structure" ],
+ *         "contentType" : "INTEGER",
+ *         "conversionPattern" : null,
+ *         "required" : true
+ *       },
+ *       "operator" : "LESS_THAN",
+ *       "value" : "10"
+ *     }
+ *   },
+ *   "fieldConditionCombiners" : [ 
+ *     {
+ *       "fieldConditionRefs" : [ "f1", "f2" ],
+ *       "combiner" : "AT_LEAST",
+ *       "n" : 1
+ *     }, {
+ *       "fieldConditionRefs" : [ "f1" ],
+ *       "combiner" : "ANY",
+ *       "n" : 1
+ *     } 
+ *   ]
+ * }
+ * </pre>   
+ * If any field condition combiner is provided, the filter does not require <i>all</i> field conditions to hold for each message any more (see above). Instead 
+ * some field conditions are combined (<i>fieldConditionRefs</i>) by referencing them inside a combiner element. For each combined set of conditions a type
+ * must be specified: <b>AT_LEAST</b>, <b>AT_MOST</b> or <b>ALL</b>. The type defines the circumstances under which the combined conditions return true for 
+ * an incoming message. The <i>n</i> parameter provides further information when selecting a combiner like <b>AT_LEAST</b> which requires the number of
+ * conditions that must hold at minimum. Supported types are:
+ * <ul>
+ *   <li><b>ALL</b><br/>all conditions must hold in order to return true on an incoming message</li>
+ *   <li><b>ANY</b><br/>any/at least one condition must hold in order to return true on an incoming message</li>
+ *   <li><b>AT_LEAST</b><br/>at least <i>n</i> conditions must hold in order to return true on an incoming message</li>
+ *   <li><b>AT_MOST</b><br/>at most <i>n</i> conditions must hold in order to return true on an incoming message</li>
+ *   <li><b>EXACTLY</b><br/>exactly <i>n</i> conditions must hold in order to return true on an incoming message</li>
  * </ul>  
+ * Each incoming message is provided to all combined field conditions. The filter implementation requires all combined field conditions to hold in order
+ * to return true for a message:
+ * <pre>
+ *   (<b>AT LEAST</b> one of (A, B, C)) <b>AND</b> (<b>AT MOST</b> two of (C, D, E)) must hold
+ * </pre>
  * @author mnxfst
  * @since Jan 12, 2016
- * TODO extract JSON processing features to dedicated class
  */
 public class JsonContentFilter implements FilterFunction<JSONObject> {
 
 	private static final long serialVersionUID = 4503194679586417037L;
-	
-	public static final String CFG_FIELD_INFIX = ".field.";
-	public static final String OPERATOR_ELEMENT_ID = "oid";
 
-	private JsonProcessingUtils jsonUtils = new JsonProcessingUtils();
+	// matcher instance later used for evaluating incoming messages
 	private Matcher<?> jsonContentMatcher = null;
-	
+
+	/**
+	 * Initializes the filter without any configuration. As the semantics of the filter is defined as
+	 * <i>"if the matcher evaluates a message to true for a provided set of validation rules the message is passed on"</i>
+	 * a filter without configuration blocks away all incoming messages    
+	 */
 	public JsonContentFilter() {
 	}
 	
@@ -76,14 +168,31 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 	/**
 	 * @see org.apache.flink.api.common.functions.RichFilterFunction#filter(java.lang.Object)
 	 */
-	public boolean filter(JSONObject jsonObject) throws Exception {
-		return this.jsonContentMatcher.matches(Arrays.asList(jsonObject));
+	public boolean filter(JSONObject jsonObject) throws Exception {		
+		// if no matcher was provided the filter simply returns false as the messages does not comply with anything
+		return this.jsonContentMatcher != null ? this.jsonContentMatcher.matches(Arrays.asList(jsonObject)) : false;
 	}
 
+	/**
+	 * Builds a {@link Matcher} instance that is used by {@link #filter(JSONObject)} to decide upon whether a message complies
+	 * with the configured filter configuration
+	 * @param cfg
+	 * 		The {@link JsonContentFilterConfiguration} holding all configuration options required for setting up the {@link Matcher} instance
+	 * @return
+	 * 		The {@link Matcher} instance
+	 * @throws NoSuchMethodException
+	 * 		Thrown in case a requested {@link FieldConditionOperator} is currently not supported
+	 * @throws IllegalArgumentException
+	 * 		Thrown in case a required input is missing
+	 * @throws ParseException
+	 * 		Thrown in case parsing out content failed for any reason - specifically thrown in conjunction with invalid timestamp formats
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Matcher<?> buildMatcher(final JsonContentFilterConfiguration cfg) throws NoSuchMethodException, IllegalArgumentException, ParseException {
 		
 		///////////////////////////////////////////////////////////////////////
-		// validate provided input
+		// validate provided input - more in-depth validation is done by 
+		// subsequent methods to reduce code and check where it is necessary 
 		if(cfg == null)
 			throw new IllegalArgumentException("Missing required configuration");
 		if(cfg.getFieldContentMatchers() == null || cfg.getFieldContentMatchers().isEmpty())
@@ -95,27 +204,22 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 		// no combiners found: append all matchers to a single json matcher and require that all must validate to true
 		// in case to accept a json document
 		if(cfg.getFieldContentMatcherCombiners() == null || cfg.getFieldContentMatcherCombiners().isEmpty()) {
-			for(final FieldContentMatcherConfiguration contentMatcherCfg : cfg.getFieldContentMatchers().values()) {
+			for(final FieldConditionConfiguration contentMatcherCfg : cfg.getFieldContentMatchers().values()) {
 				matchJsonContent = addMatcher(matchJsonContent, contentMatcherCfg);		
 			}
 			return matchJsonContent.onEachRecord();
 		}
 		
-		List<OutputMatcher<JSONObject>> matchers = new ArrayList<>();
-		
-		for(final FieldContentMatcherCombinerConfiguration combinerCfg : cfg.getFieldContentMatcherCombiners()) {
-			final MatchJSONContent mjc = buildCombiner(combinerCfg, cfg.getFieldContentMatchers());
-			matchers.add(mjc.onEachRecord());
+		// otherwise create a combiner for each combiner configuration and attach the generated output matcher 
+		// to a list for further use
+		List<OutputMatcher<JSONObject>> matchers = new ArrayList<>();		
+		for(final FieldConditionCombinerConfiguration combinerCfg : cfg.getFieldContentMatcherCombiners()) {
+			matchers.add(buildCombiner(combinerCfg, cfg.getFieldContentMatchers()));
 		}
-		
-		MatchJSONContent matcher = new MatchJSONContent();
-		
-		OutputMatcher<JSONObject> m = matcher.assertString("...", Matchers.isEmptyOrNullString()).anyOfThem().onEachRecord();
-		OutputMatcher<JSONObject> c = null;
-		
-		Matcher<Iterable<JSONObject>> mm = Matchers.allOf(matchers.toArray(new OutputMatcher[0]));
-		
-		return mm;
+
+		// combine all output matchers such that all of them must evaluate to true 
+		// TODO provide more detailed configurations like grouping		
+		return Matchers.allOf((Iterable)matchers);
 	}
 	
 	/**
@@ -127,7 +231,7 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 	 * @throws IllegalArgumentException
 	 * @throws ParseException
 	 */
-	protected MatchJSONContent buildCombiner(final FieldContentMatcherCombinerConfiguration combinerConfiguration, final Map<String, FieldContentMatcherConfiguration> fieldContentMatcherConfiguration) throws NoSuchMethodException, IllegalArgumentException, ParseException {
+	protected OutputMatcher<JSONObject> buildCombiner(final FieldConditionCombinerConfiguration combinerConfiguration, final Map<String, FieldConditionConfiguration> fieldContentMatcherConfiguration) throws NoSuchMethodException, IllegalArgumentException, ParseException {
 		
 		///////////////////////////////////////////////////////////////////////
 		// validate provided input
@@ -135,15 +239,15 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 			throw new IllegalArgumentException("Missing required matcher combiner configuration");
 		if(combinerConfiguration.getCombiner() == null)
 			throw new IllegalArgumentException("Missing required matcher combiner type");
-		if(combinerConfiguration.getFieldContentMatcherRefs() == null || combinerConfiguration.getFieldContentMatcherRefs().isEmpty())			
+		if(combinerConfiguration.getFieldConditionRefs() == null || combinerConfiguration.getFieldConditionRefs().isEmpty())			
 			throw new IllegalArgumentException("Missing required references into matcher configurations");
 		if(fieldContentMatcherConfiguration == null || fieldContentMatcherConfiguration.isEmpty())
 			throw new IllegalArgumentException("Missing required field content matchers");
 		///////////////////////////////////////////////////////////////////////
 
 		MatchJSONContent matchJSONContent = new MatchJSONContent();
-		for(final String matcherId : combinerConfiguration.getFieldContentMatcherRefs()) {
-			final FieldContentMatcherConfiguration matcherCfg = fieldContentMatcherConfiguration.get(matcherId);
+		for(final String matcherId : combinerConfiguration.getFieldConditionRefs()) {
+			final FieldConditionConfiguration matcherCfg = fieldContentMatcherConfiguration.get(matcherId);
 			if(matcherCfg == null)
 				throw new IllegalArgumentException("Missing required field content matcher configuration for ref '"+matcherId+"'");
 			matchJSONContent = addMatcher(matchJSONContent, matcherCfg);
@@ -151,31 +255,35 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 		
 		switch(combinerConfiguration.getCombiner()) {
 			case ANY: {
-				matchJSONContent.anyOfThem();
-				break;
+				return matchJSONContent.anyOfThem().onEachRecord();
 			}
 			case AT_LEAST: {
-				matchJSONContent.atLeastNOfThem(combinerConfiguration.getN());
-				break;
+				if(combinerConfiguration.getN() < 0 || combinerConfiguration.getN() > fieldContentMatcherConfiguration.size())
+					throw new IllegalArgumentException("Negative values or values that exceed the number of available matcher configurations are not permitted for combiner parameter 'n'");
+				return matchJSONContent.atLeastNOfThem(combinerConfiguration.getN()).onEachRecord();
 			}
 			case AT_MOST: {
-				matchJSONContent.atMostNOfThem(combinerConfiguration.getN());
-				break;
+				if(combinerConfiguration.getN() < 0 || combinerConfiguration.getN() > fieldContentMatcherConfiguration.size())
+					throw new IllegalArgumentException("Negative values or values that exceed the number of available matcher configurations are not permitted for combiner parameter 'n'");
+				return matchJSONContent.atMostNOfThem(combinerConfiguration.getN()).onEachRecord();
 			}
 			case EXACTLY: {
-				matchJSONContent.exactlyNOfThem(combinerConfiguration.getN());
-				break;
+				if(combinerConfiguration.getN() < 0 || combinerConfiguration.getN() > fieldContentMatcherConfiguration.size())
+					throw new IllegalArgumentException("Negative values or values that exceed the number of available matcher configurations are not permitted for combiner parameter 'n'");
+				return matchJSONContent.exactlyNOfThem(combinerConfiguration.getN()).onEachRecord();
 			}
 			case ALL: {
-				break;
+				return matchJSONContent.onEachRecord();
 			}
+			default: {
+				return matchJSONContent.onEachRecord();
+			}
+				
 		}
-		
-		return matchJSONContent;
 	}
 
 	/**
-	 * Adds a {@link Matcher} to an existing/newly created {@link MatchJSONContent} instance according to the give {@link FieldContentMatcherConfiguration} 
+	 * Adds a {@link Matcher} to an existing/newly created {@link MatchJSONContent} instance according to the give {@link FieldConditionConfiguration} 
 	 * @param matchJsonContent
 	 * 			The {@link MatchJSONContent} instance to add a new {@link Matcher} to. If null is provided a new {@link MatchJSONContent} is created
 	 * @param cfg
@@ -186,54 +294,54 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 	 * @throws IllegalArgumentException
 	 * @throws ParseException
 	 */
-	protected MatchJSONContent addMatcher(MatchJSONContent matchJsonContent, final FieldContentMatcherConfiguration cfg) throws NoSuchMethodException, IllegalArgumentException, ParseException {
+	protected MatchJSONContent addMatcher(MatchJSONContent matchJsonContent, final FieldConditionConfiguration cfg) throws NoSuchMethodException, IllegalArgumentException, ParseException {
 		
 		///////////////////////////////////////////////////////////////////////
 		// validate provided input
 		if(cfg == null)
 			throw new IllegalArgumentException("Missing required configuration");
-		if(cfg.getMatcher() == null)
+		if(cfg.getOperator() == null)
 			throw new IllegalArgumentException("Missing required matcher type");
-		if(cfg.getRef() == null)
+		if(cfg.getContentRef() == null)
 			throw new IllegalArgumentException("Missing required content reference");
-		if(cfg.getRef().getContentType() == null)
+		if(cfg.getContentRef().getContentType() == null)
 			throw new IllegalArgumentException("Missing required content type");
-		if(cfg.getRef().getPath() == null || cfg.getRef().getPath().length < 1)
+		if(cfg.getContentRef().getPath() == null || cfg.getContentRef().getPath().length < 1)
 			throw new IllegalArgumentException("Missing required content path");
-		if(cfg.getRef().getContentType() == JsonContentType.TIMESTAMP && StringUtils.isBlank(cfg.getRef().getConversionPattern()))
+		if(cfg.getContentRef().getContentType() == JsonContentType.TIMESTAMP && StringUtils.isBlank(cfg.getContentRef().getConversionPattern()))
 			throw new IllegalArgumentException("Missing required conversion pattern for content type '"+JsonContentType.TIMESTAMP+"'");
 		///////////////////////////////////////////////////////////////////////
 
 		if(matchJsonContent == null)
 			matchJsonContent = new MatchJSONContent();
 		
-		switch(cfg.getRef().getContentType()) {
+		switch(cfg.getContentRef().getContentType()) {
 			case BOOLEAN: {
-				return matchJsonContent.assertBoolean(String.join(".", cfg.getRef().getPath()), 
-						matcher(cfg.getMatcher(), 
-								(StringUtils.isNotBlank(cfg.getValue()) ? Boolean.parseBoolean(cfg.getValue()) : null), cfg.getRef().getContentType()));
+				return matchJsonContent.assertBoolean(String.join(".", cfg.getContentRef().getPath()), 
+						matcher(cfg.getOperator(), 
+								(StringUtils.isNotBlank(cfg.getValue()) ? Boolean.parseBoolean(cfg.getValue()) : null), cfg.getContentRef().getContentType()));
 			}
 			case DOUBLE: {
-				return matchJsonContent.assertDouble(String.join(".", cfg.getRef().getPath()), 
-						matcher(cfg.getMatcher(), 
-								(StringUtils.isNotBlank(cfg.getValue()) ? Double.parseDouble(cfg.getValue()) : null), cfg.getRef().getContentType()));
+				return matchJsonContent.assertDouble(String.join(".", cfg.getContentRef().getPath()), 
+						matcher(cfg.getOperator(), 
+								(StringUtils.isNotBlank(cfg.getValue()) ? Double.parseDouble(cfg.getValue()) : null), cfg.getContentRef().getContentType()));
 			}
 			case INTEGER: {
-				return matchJsonContent.assertInteger(String.join(".", cfg.getRef().getPath()), 
-						matcher(cfg.getMatcher(), 
-								(StringUtils.isNotBlank(cfg.getValue()) ? Integer.parseInt(cfg.getValue()) : null), cfg.getRef().getContentType()));
+				return matchJsonContent.assertInteger(String.join(".", cfg.getContentRef().getPath()), 
+						matcher(cfg.getOperator(), 
+								(StringUtils.isNotBlank(cfg.getValue()) ? Integer.parseInt(cfg.getValue()) : null), cfg.getContentRef().getContentType()));
 			}
 			case STRING: {
-				return matchJsonContent.assertString(String.join(".", cfg.getRef().getPath()), matcher(cfg.getMatcher(), cfg.getValue(), cfg.getRef().getContentType()));
+				return matchJsonContent.assertString(String.join(".", cfg.getContentRef().getPath()), matcher(cfg.getOperator(), cfg.getValue(), cfg.getContentRef().getContentType()));
 			}
 			case TIMESTAMP: {				
 				if(StringUtils.isNotBlank(cfg.getValue())) {
-					final SimpleDateFormat sdf = new SimpleDateFormat(cfg.getRef().getConversionPattern());
-					return matchJsonContent.assertTimestamp(String.join(".", cfg.getRef().getPath()), cfg.getRef().getConversionPattern(), 
-							matcher(cfg.getMatcher(), sdf.parse(cfg.getValue()), cfg.getRef().getContentType()));
+					final SimpleDateFormat sdf = new SimpleDateFormat(cfg.getContentRef().getConversionPattern());
+					return matchJsonContent.assertTimestamp(String.join(".", cfg.getContentRef().getPath()), cfg.getContentRef().getConversionPattern(), 
+							matcher(cfg.getOperator(), sdf.parse(cfg.getValue()), cfg.getContentRef().getContentType()));
 				}				
-				return matchJsonContent.assertTimestamp(String.join(".", cfg.getRef().getPath()), cfg.getRef().getConversionPattern(), 
-						matcher(cfg.getMatcher(), null, cfg.getRef().getContentType()));
+				return matchJsonContent.assertTimestamp(String.join(".", cfg.getContentRef().getPath()), cfg.getContentRef().getConversionPattern(), 
+						matcher(cfg.getOperator(), null, cfg.getContentRef().getContentType()));
 			}
 			default:
 				return matchJsonContent;
@@ -251,7 +359,7 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 	 * @throws NoSuchMethodException
 	 * @throws IllegalArgumentException
 	 */
-	protected <T extends Comparable<T>> Matcher<T> matcher(final ContentMatcher matcherType, final T value, final JsonContentType type) throws NoSuchMethodException, IllegalArgumentException {
+	protected <T extends Comparable<T>> Matcher<T> matcher(final FieldConditionOperator matcherType, final T value, final JsonContentType type) throws NoSuchMethodException, IllegalArgumentException {
 		
 		///////////////////////////////////////////////////////////////////////
 		// validate provided input
@@ -291,15 +399,15 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 	
 	public static void main(String[] args) throws Exception {
 		
-		FieldContentMatcherConfiguration f1 = new FieldContentMatcherConfiguration(new JsonContentReference(new String[]{"path","to","element"}, JsonContentType.STRING, true), ContentMatcher.IS, "test");
-		FieldContentMatcherConfiguration f2 = new FieldContentMatcherConfiguration(new JsonContentReference(new String[]{"another","path","into", "structure"}, JsonContentType.INTEGER, true), ContentMatcher.LESS_THAN, "10");
+		FieldConditionConfiguration f1 = new FieldConditionConfiguration(new JsonContentReference(new String[]{"path","to","element"}, JsonContentType.STRING, true), FieldConditionOperator.IS, "test");
+		FieldConditionConfiguration f2 = new FieldConditionConfiguration(new JsonContentReference(new String[]{"another","path","into", "structure"}, JsonContentType.INTEGER, true), FieldConditionOperator.LESS_THAN, "10");
 
 		JsonContentFilterConfiguration cfg = new JsonContentFilterConfiguration();
 		cfg.addFieldContentMatcher("f1", f1);
 		cfg.addFieldContentMatcher("f2", f2);
 		
-		cfg.addFieldContentMatchersCombiner(new FieldContentMatcherCombinerConfiguration(FieldContentMatcherCombiner.AT_LEAST, 1, "f1", "f2"));
-		cfg.addFieldContentMatchersCombiner(new FieldContentMatcherCombinerConfiguration(FieldContentMatcherCombiner.ANY, 1, "f1"));
+		cfg.addFieldContentMatchersCombiner(new FieldConditionCombinerConfiguration(FieldConditionCombiner.AT_LEAST, 1, "f1", "f2"));
+		cfg.addFieldContentMatchersCombiner(new FieldConditionCombinerConfiguration(FieldConditionCombiner.ANY, 1, "f1"));
 		
 		System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(cfg));
 		

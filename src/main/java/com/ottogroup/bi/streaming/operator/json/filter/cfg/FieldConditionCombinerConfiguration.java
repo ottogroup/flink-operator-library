@@ -36,25 +36,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * matchers must evaluate to true before the currently processed JSON object gets accepted. If no
  * such section is included in {@link JsonContentFilterConfiguration} any of the provided 
  * {@link JsonContentFilterConfiguration#getFieldContentMatchers()} must evaluate to true. That 
- * behavior is equal to listing all field content matchers here and requesting {@link FieldContentMatcherCombiner#ANY}. 
+ * behavior is equal to listing all field content matchers here and requesting {@link FieldConditionCombiner#ANY}. 
  * @author mnxfst
  * @since Apr 26, 2016
  *
  */
-public class FieldContentMatcherCombinerConfiguration implements Serializable {
+public class FieldConditionCombinerConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -1477685211279523068L;
 
 	/** list of identifiers referencing content matchers that must be included into this combiner */
 	@NotNull
 	@Size(min=1)
-	@JsonProperty(value="fieldContentMatcherRefs", required=true)
-	private List<String> fieldContentMatcherRefs = new ArrayList<>();
+	@JsonProperty(value="fieldConditionRefs", required=true)
+	private List<String> fieldConditionRefs = new ArrayList<>();
 	
 	/** how to combine the matchers */
 	@NotNull
 	@JsonProperty(value="combiner", required=true)
-	private FieldContentMatcherCombiner combiner = FieldContentMatcherCombiner.ANY;
+	private FieldConditionCombiner combiner = FieldConditionCombiner.ANY;
 
 	/** required to set the number of matchers that must evaluate to true if combiners other than ANY are selected */
 	@NotNull
@@ -62,32 +62,32 @@ public class FieldContentMatcherCombinerConfiguration implements Serializable {
 	@JsonProperty(value="n", required=true)
 	private int n = 0;
 	
-	public FieldContentMatcherCombinerConfiguration() {		
+	public FieldConditionCombinerConfiguration() {		
 	}
 
-	public FieldContentMatcherCombinerConfiguration(final FieldContentMatcherCombiner combiner, final int n, final String ... refs) {
+	public FieldConditionCombinerConfiguration(final FieldConditionCombiner combiner, final int n, final String ... refs) {
 		this.combiner = combiner;
 		this.n = n;
 		if(refs != null && refs.length > 0) {
 			for(int i = 0; i < refs.length; i++)
-				if(!this.fieldContentMatcherRefs.contains(refs[i]))
-					this.fieldContentMatcherRefs.add(refs[i]);
+				if(!this.fieldConditionRefs.contains(refs[i]))
+					this.fieldConditionRefs.add(refs[i]);
 		}
 	}
 
-	public List<String> getFieldContentMatcherRefs() {
-		return fieldContentMatcherRefs;
+	public List<String> getFieldConditionRefs() {
+		return fieldConditionRefs;
 	}
 
-	public void setFieldContentMatcherRefs(List<String> fieldContentMatcherRefs) {
-		this.fieldContentMatcherRefs = fieldContentMatcherRefs;
+	public void setFieldConditionRefs(List<String> fieldConditionRefs) {
+		this.fieldConditionRefs = fieldConditionRefs;
 	}
 
-	public FieldContentMatcherCombiner getCombiner() {
+	public FieldConditionCombiner getCombiner() {
 		return combiner;
 	}
 
-	public void setCombiner(FieldContentMatcherCombiner combiner) {
+	public void setCombiner(FieldConditionCombiner combiner) {
 		this.combiner = combiner;
 	}
 

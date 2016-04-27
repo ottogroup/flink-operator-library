@@ -40,38 +40,38 @@ public class JsonContentFilterConfiguration implements Serializable {
 	/** list of configured field content matchers */
 	@NotNull
 	@Size(min=1)
-	@JsonProperty(value="fieldContentMatchers", required=true)
-	private Map<String, FieldContentMatcherConfiguration> fieldContentMatchers = new HashMap<>();
+	@JsonProperty(value="fieldConditions", required=true)
+	private Map<String, FieldConditionConfiguration> fieldContentMatchers = new HashMap<>();
 
 	/** list of matcher combiner configurations - if missing, any of the content matchers must evaluate to true for incoming content */
-	@JsonProperty(value="fieldContentMatcherCombiners", required=false)
-	private List<FieldContentMatcherCombinerConfiguration> fieldContentMatcherCombiners = new ArrayList<>();
+	@JsonProperty(value="fieldConditionCombiners", required=false)
+	private List<FieldConditionCombinerConfiguration> fieldContentMatcherCombiners = new ArrayList<>();
 	
 	public JsonContentFilterConfiguration() {		
 	}
 	
-	public void addFieldContentMatcher(final String id, final FieldContentMatcherConfiguration cfg) {
+	public void addFieldContentMatcher(final String id, final FieldConditionConfiguration cfg) {
 		this.fieldContentMatchers.put(id, cfg);
 	}
 	
-	public void addFieldContentMatchersCombiner(final FieldContentMatcherCombinerConfiguration cfg) {
+	public void addFieldContentMatchersCombiner(final FieldConditionCombinerConfiguration cfg) {
 		this.fieldContentMatcherCombiners.add(cfg);
 	}
 
-	public Map<String, FieldContentMatcherConfiguration> getFieldContentMatchers() {
+	public Map<String, FieldConditionConfiguration> getFieldContentMatchers() {
 		return fieldContentMatchers;
 	}
 
-	public void setFieldContentMatchers(Map<String, FieldContentMatcherConfiguration> fieldContentMatchers) {
+	public void setFieldContentMatchers(Map<String, FieldConditionConfiguration> fieldContentMatchers) {
 		this.fieldContentMatchers = fieldContentMatchers;
 	}
 
-	public List<FieldContentMatcherCombinerConfiguration> getFieldContentMatcherCombiners() {
+	public List<FieldConditionCombinerConfiguration> getFieldContentMatcherCombiners() {
 		return fieldContentMatcherCombiners;
 	}
 
 	public void setFieldContentMatcherCombiners(
-			List<FieldContentMatcherCombinerConfiguration> fieldContentMatcherCombiners) {
+			List<FieldConditionCombinerConfiguration> fieldContentMatcherCombiners) {
 		this.fieldContentMatcherCombiners = fieldContentMatcherCombiners;
 	}
 	

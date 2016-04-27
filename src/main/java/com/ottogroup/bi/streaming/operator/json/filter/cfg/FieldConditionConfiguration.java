@@ -28,48 +28,48 @@ import com.ottogroup.bi.streaming.operator.json.JsonContentReference;
  * @since Apr 26, 2016
  *
  */
-public class FieldContentMatcherConfiguration implements Serializable {
+public class FieldConditionConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -5080138507217022078L;
 	
 	/** reference into json object pointing to field that must be validated */
 	@NotNull
-	@JsonProperty(value="ref", required=true)
-	private JsonContentReference ref = null;
+	@JsonProperty(value="contentRef", required=true)
+	private JsonContentReference contentRef = null;
 
 	/** defines the matcher to apply on the referenced field */
 	@NotNull
-	@JsonProperty(value="matcher", required=true)
-	private ContentMatcher matcher = null;
+	@JsonProperty(value="operator", required=true)
+	private FieldConditionOperator operator = null;
 	
 	/** value to evaluate the field content against */
 	@NotNull
 	@JsonProperty(value="value", required=true)
 	private String value = null;
 		
-	public FieldContentMatcherConfiguration() {		
+	public FieldConditionConfiguration() {		
 	}
 	
-	public FieldContentMatcherConfiguration(final JsonContentReference ref, final ContentMatcher matcher, final String value) {
-		this.ref = ref;
-		this.matcher = matcher;
+	public FieldConditionConfiguration(final JsonContentReference contentRef, final FieldConditionOperator operator, final String value) {
+		this.contentRef = contentRef;
+		this.operator = operator;
 		this.value = value;
 	}
 
-	public JsonContentReference getRef() {
-		return ref;
+	public JsonContentReference getContentRef() {
+		return contentRef;
 	}
 
-	public void setRef(JsonContentReference ref) {
-		this.ref = ref;
+	public void setContentRef(JsonContentReference contentRef) {
+		this.contentRef = contentRef;
 	}
 
-	public ContentMatcher getMatcher() {
-		return matcher;
+	public FieldConditionOperator getOperator() {
+		return operator;
 	}
 
-	public void setMatcher(ContentMatcher matcher) {
-		this.matcher = matcher;
+	public void setOperator(FieldConditionOperator operator) {
+		this.operator = operator;
 	}
 
 	public String getValue() {

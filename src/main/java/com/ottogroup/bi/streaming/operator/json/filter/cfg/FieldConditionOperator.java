@@ -18,11 +18,10 @@ package com.ottogroup.bi.streaming.operator.json.filter.cfg;
 import java.io.Serializable;
 
 /**
- * Supported combiner types
+ * List of supported operators / matcher types
  * @author mnxfst
  * @since Apr 26, 2016
- *
  */
-public enum FieldContentMatcherCombiner implements Serializable {
-	ALL, ANY, AT_LEAST, AT_MOST, EXACTLY
+public enum FieldConditionOperator implements Serializable {
+	IS, NOT, LESS_THAN, GREATER_THAN, LIKE, IS_EMPTY, NOT_EMPTY
 }
