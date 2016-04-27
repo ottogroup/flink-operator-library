@@ -9,3 +9,4 @@ The library provides a set of [Apache Flink](https://flink.apache.org) operators
 * [JSON processing utilities](https://github.com/ottogroup/flink-operator-library/wiki/JSON%20processing%20utilities)
 * [an abstract runtime foundation for streaming applications to speed up development](https://github.com/ottogroup/flink-operator-library/wiki/Base-runtime-for-streaming-applications)  
 * [a selector implementation to extract keys from JSON documents](https://github.com/ottogroup/flink-operator-library/wiki/JSON-document-backed-key-selector) 
+* [a JSON to character separated string converter](https://github.com/ottogroup/flink-operator-library/wiki/JSON-to-CSV-conversion-operator)
