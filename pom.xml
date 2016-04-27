@@ -58,6 +58,13 @@
         <url>https://github.com/ottogroup/flink-operator-library/issues</url>
 	</issueManagement>
 	
+	<repositories>
+		<repository>
+        	<id>otto-bintray</id>
+			<url>https://dl.bintray.com/ottogroup/maven</url>
+		</repository>
+	</repositories>
+	
 	<distributionManagement>
 		<repository>
 			<id>bintray-ottogroup-maven</id>
@@ -120,14 +127,14 @@
 		<!-- apache flink related libraries along with configurable flink & scala version -->
 		<dependency>
 			<groupId>org.flinkspector</groupId>
-			<artifactId>flinkspector-core</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<artifactId>flinkspector-core_2.10</artifactId>
+			<version>0.3</version>
 		</dependency>
 				
 		<dependency>
 			<groupId>org.flinkspector</groupId>
-			<artifactId>flinkspector-datastream</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<artifactId>flinkspector-datastream_2.10</artifactId>
+			<version>0.3</version>
 		</dependency>		
 		
 		<dependency>

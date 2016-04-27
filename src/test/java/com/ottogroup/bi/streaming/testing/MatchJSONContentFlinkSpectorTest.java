@@ -19,7 +19,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 import org.flinkspector.core.quantify.OutputMatcher;
-import org.flinkspector.datastream.StreamTestBase;
+import org.flinkspector.datastream.DataStreamTestBase;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ import org.junit.Test;
  * @since Apr 26, 2016
  *
  */
-public class MatchJSONContentFlinkSpectorTest extends StreamTestBase {
+public class MatchJSONContentFlinkSpectorTest extends DataStreamTestBase {
 
 	/**
 	 * Test case to show the integration of {@link MatchJSONContent} with {@link StreamTestBase}
