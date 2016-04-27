@@ -23,9 +23,8 @@ import com.ottogroup.bi.streaming.operator.json.JsonContentReference;
 import com.ottogroup.bi.streaming.operator.json.JsonProcessingUtils;
 
 /**
- * Provides a {@link KeySelector} implementation which operates on {@link JSONObject} instances 
- * where it extracts values from a configured location. The values serve as selection key in 
- * a surrounding operator. The path into the json document is provided as {@link JsonContentReference}.
+ * Provides a {@link KeySelector} implementation which takes {@link JSONObject} instances 
+ * and extracts the key value from from a configured location. The location is provided via {@link JsonContentReference}.
  * @author mnxfst
  * @since 20.04.2016
  */
