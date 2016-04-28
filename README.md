@@ -10,6 +10,7 @@ The library provides a set of [Apache Flink](https://flink.apache.org) operators
 * [an abstract runtime foundation for streaming applications to speed up development](https://github.com/ottogroup/flink-operator-library/wiki/Base-runtime-for-streaming-applications)  
 * [a selector implementation to extract keys from JSON documents](https://github.com/ottogroup/flink-operator-library/wiki/JSON-document-backed-key-selector) 
 * [a JSON to character separated string converter](https://github.com/ottogroup/flink-operator-library/wiki/JSON-to-CSV-conversion-operator)
+* [an operator to insert static content into existing JSON documents](https://github.com/ottogroup/flink-operator-library/wiki/Static-content-insertion-into-existing-JSON-documents)
 
 To integrate the library with maven based projects, please add these sections:
 
