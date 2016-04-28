@@ -31,13 +31,11 @@ import org.flinkspector.core.quantify.OutputMatcher;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ottogroup.bi.streaming.operator.json.JsonContentReference;
 import com.ottogroup.bi.streaming.operator.json.JsonContentType;
-import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldConditionOperator;
-import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldConditionCombiner;
 import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldConditionCombinerConfiguration;
 import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldConditionConfiguration;
+import com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldConditionOperator;
 import com.ottogroup.bi.streaming.operator.json.filter.cfg.JsonContentFilterConfiguration;
 import com.ottogroup.bi.streaming.testing.MatchJSONContent;
 
@@ -396,20 +394,4 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 		}		
 	}
 	
-	
-	public static void main(String[] args) throws Exception {
-		
-		FieldConditionConfiguration f1 = new FieldConditionConfiguration(new JsonContentReference(new String[]{"path","to","element"}, JsonContentType.STRING, true), FieldConditionOperator.IS, "test");
-		FieldConditionConfiguration f2 = new FieldConditionConfiguration(new JsonContentReference(new String[]{"another","path","into", "structure"}, JsonContentType.INTEGER, true), FieldConditionOperator.LESS_THAN, "10");
-
-		JsonContentFilterConfiguration cfg = new JsonContentFilterConfiguration();
-		cfg.addFieldContentMatcher("f1", f1);
-		cfg.addFieldContentMatcher("f2", f2);
-		
-		cfg.addFieldContentMatchersCombiner(new FieldConditionCombinerConfiguration(FieldConditionCombiner.AT_LEAST, 1, "f1", "f2"));
-		cfg.addFieldContentMatchersCombiner(new FieldConditionCombinerConfiguration(FieldConditionCombiner.ANY, 1, "f1"));
-		
-		System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(cfg));
-		
-	}
 }

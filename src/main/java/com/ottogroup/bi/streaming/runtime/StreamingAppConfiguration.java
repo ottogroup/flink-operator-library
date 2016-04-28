@@ -66,13 +66,6 @@ public abstract class StreamingAppConfiguration implements Serializable {
 		this.applicationDescription = description;
 	}
 	
-	public StreamingAppConfiguration(final String name, final String description, final int parallelism, final int executionRetries) {
-		this.applicationName = name;
-		this.applicationDescription = description;
-		this.parallelism = parallelism;
-		this.executionRetries = executionRetries;
-	}
-	
 	public String getApplicationName() {
 		return applicationName;
 	}
