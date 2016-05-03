@@ -17,17 +17,20 @@ package com.ottogroup.bi.streaming.operator.json.insert;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sling.commons.json.JSONObject;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.ottogroup.bi.streaming.operator.json.JsonContentReference;
 import com.ottogroup.bi.streaming.operator.json.JsonContentType;
+import com.ottogroup.bi.streaming.testing.MatchJSONContent;
 
 
 /**
@@ -134,11 +137,15 @@ public class JsonStaticContentInsertionTest {
 	 */
 	@Test	
 	public void testMap_withValidInsertionConfiguration() throws Exception {
-		List<Pair<JsonContentReference, Serializable>> values = new ArrayList<>();
-		values.add(new ImmutablePair<JsonContentReference, Serializable>(new JsonContentReference(new String[]{"valid"}, JsonContentType.STRING), "test"));		
-		String input = "{\"test\":\"value\"}";
-		String expected = "{\"test\":\"value\",\"valid\":\"test\"}";
-		Assert.assertEquals(expected, new JsonStaticContentInsertion(values).map(new JSONObject(input)).toString());
+		Assert.assertTrue(
+				MatchJSONContent.create()
+					.assertString("test", Matchers.is("value"))
+					.assertString("valid", Matchers.is("test"))
+					.matchOnSingle(new JsonStaticContentInsertion(
+							Arrays.asList(new ImmutablePair<JsonContentReference, Serializable>(new JsonContentReference(new String[]{"valid"}, JsonContentType.STRING), "test")))
+							.map(new JSONObject("{\"test\":\"value\"}"))
+				)
+		);
 	}
 
 	/**
@@ -149,8 +156,8 @@ public class JsonStaticContentInsertionTest {
 	@Test
 	public void testInsert_withValidInput() throws Exception {		
 		JsonStaticContentInsertion inserter = new JsonStaticContentInsertion(Collections.<Pair<JsonContentReference, Serializable>>emptyList());
-		JSONObject result = inserter.insert(new JSONObject("{}"), new String[]{"path", "to", "value"}, "test-value");
-		Assert.assertEquals("{\"path\":{\"to\":{\"value\":\"test-value\"}}}", result.toString());		
+		inserter.insert(new JSONObject("{}"), new String[]{"path", "to", "value"}, "test-value");
+		MatchJSONContent.create().assertString("path.to.value", Matchers.is("test-value")).onEachRecord();		
 	}
 	
 }

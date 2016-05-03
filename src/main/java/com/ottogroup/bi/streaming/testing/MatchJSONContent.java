@@ -16,6 +16,7 @@
 
 package com.ottogroup.bi.streaming.testing;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +35,17 @@ import com.ottogroup.bi.streaming.operator.json.JsonProcessingUtils;
  */
 public class MatchJSONContent extends MatchRecords<JSONObject> {
 
+	/**
+	 * Creates a new {@link MatchJSONContent} instance. Convenient method to simplify using instances of
+	 * this type when writing test cases. It omits creating new instances by calling <i>new</i> but
+	 * allows to call this static method. 
+	 * creating new instances by calling new but allows 
+	 * @return
+	 */
+	public static MatchJSONContent create() {
+		return new MatchJSONContent();
+	}
+	
 	/**
 	 * Looks up content at a given path from a {@link JSONObject} entity and applies the provided {@link Matcher} on it. The content
 	 * is expected to be of type {@link JsonContentType#STRING}
@@ -160,5 +172,14 @@ public class MatchJSONContent extends MatchRecords<JSONObject> {
 		assertThat(new JSONFieldContentMatcher(new JsonContentReference(JsonProcessingUtils.toPathArray(path), JsonContentType.TIMESTAMP, formatString, true), matcher));
 		return this;
 	}
-
+	
+	/**
+	 * TODO
+	 * @param input
+	 * @return
+	 */
+	public boolean matchOnSingle(Object input) {
+		return this.onEachRecord().matches(Arrays.asList(input));
+	}
+	
 }
