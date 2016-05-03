@@ -21,12 +21,12 @@ import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer08;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Provides required information for setting up an instance of {@link FlinkKafkaProducer}
+ * Provides required information for setting up an instance of {@link FlinkKafkaProducer08}
  * @author mnxfst
  * @since Feb 29, 2016
  */
