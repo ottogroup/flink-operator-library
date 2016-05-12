@@ -75,8 +75,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<compiler.version>1.8</compiler.version>
-		<flink-version>1.0.2</flink-version>
-		<scala-version>_2.10</scala-version>
+		<flink-version>1.0.3</flink-version>
+		<scala-version>_2.11</scala-version>
 	</properties>
 	
 	<dependencies>	
@@ -151,7 +151,7 @@
 		
 		<dependency>
 			<groupId>org.flinkspector</groupId>
-			<artifactId>flinkspector-core_2.10</artifactId>
+			<artifactId>flinkspector-core${scala-version}</artifactId>
 			<version>0.3</version>
 			<exclusions>
 				<exclusion><groupId>org.apache.flink</groupId><artifactId>*</artifactId></exclusion>
@@ -160,7 +160,7 @@
 				
 		<dependency>
 			<groupId>org.flinkspector</groupId>
-			<artifactId>flinkspector-datastream_2.10</artifactId>
+			<artifactId>flinkspector-datastream${scala-version}</artifactId>
 			<version>0.3</version>
 			<exclusions>
 				<exclusion><groupId>org.apache.flink</groupId><artifactId>*</artifactId></exclusion>
