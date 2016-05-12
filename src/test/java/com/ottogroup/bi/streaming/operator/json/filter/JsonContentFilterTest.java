@@ -146,11 +146,45 @@ public class JsonContentFilterTest {
 
 	/**
 	 * Test case for {@link JsonContentFilter#matcher(com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldConditionOperator, Comparable, JsonContentType)}
-	 * being provided a valid string and the request for an {@link FieldConditionOperator#LIKE} matcher 
+	 * being provided a valid string and the request for an {@link FieldConditionOperator#LIKE} matcher (simple string matcher)
 	 */
-	@Test(expected=NoSuchMethodException.class)
-	public void testMatcher_withValidStringAndLikeMatcher() throws Exception {
-		new JsonContentFilter().matcher(FieldConditionOperator.LIKE, "test", JsonContentType.STRING);
+	@Test
+	public void testMatcher_withValidStringAndPatternMatcher() throws Exception {
+		Matcher<String> matcher = new JsonContentFilter().matcher(FieldConditionOperator.LIKE, "test", JsonContentType.STRING);
+		Assert.assertNotNull(matcher);
+		Assert.assertTrue(matcher.matches("test"));
+		Assert.assertFalse(matcher.matches("tester"));
+		Assert.assertFalse(matcher.matches("tes"));
+		
+		matcher = new JsonContentFilter().matcher(FieldConditionOperator.LIKE, null, JsonContentType.STRING);
+		Assert.assertNotNull(matcher);
+		Assert.assertFalse(matcher.matches("test"));
+		Assert.assertFalse(matcher.matches("tester"));
+		Assert.assertFalse(matcher.matches("tes"));
+		Assert.assertTrue(matcher.matches(null));
+	}
+
+	/**
+	 * Test case for {@link JsonContentFilter#matcher(com.ottogroup.bi.streaming.operator.json.filter.cfg.FieldConditionOperator, Comparable, JsonContentType)}
+	 * being provided a valid string and the request for an {@link FieldConditionOperator#LIKE} matcher (complex pattern)
+	 */
+	@Test
+	public void testMatcher_withValidStringAndComplexPatternMatcher() throws Exception {
+		Matcher<String> matcher = new JsonContentFilter().matcher(FieldConditionOperator.LIKE, "(first|last)name", JsonContentType.STRING);
+		Assert.assertNotNull(matcher);
+		Assert.assertTrue(matcher.matches("firstname"));
+		Assert.assertTrue(matcher.matches("lastname"));
+		Assert.assertFalse(matcher.matches("firstName"));
+		Assert.assertFalse(matcher.matches("noname"));
+		Assert.assertFalse(matcher.matches("firstername"));
+		
+		matcher = new JsonContentFilter().matcher(FieldConditionOperator.LIKE, "(?i)(first|last)name", JsonContentType.STRING);
+		Assert.assertNotNull(matcher);
+		Assert.assertTrue(matcher.matches("firstname"));
+		Assert.assertTrue(matcher.matches("lastname"));
+		Assert.assertTrue(matcher.matches("firstName"));
+		Assert.assertFalse(matcher.matches("noname"));
+		Assert.assertFalse(matcher.matches("firstername"));
 	}
 
 	/**

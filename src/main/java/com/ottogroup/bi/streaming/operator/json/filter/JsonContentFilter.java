@@ -381,7 +381,7 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 				return Matchers.lessThan(value);
 			}
 			case LIKE: {
-				throw new NoSuchMethodException("like is currently not supported");
+				return RegularExpressionMatcher.matchesPattern((value != null ? value.toString() : null));
 			}
 			case NOT: {
 				return Matchers.not(value);
@@ -392,6 +392,7 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 			default:
 				throw new NoSuchMethodException(matcherType + " is currently not supported");
 		}		
+		
 	}
 	
 }
