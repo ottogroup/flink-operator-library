@@ -6,7 +6,7 @@
 	<!-- maven specifc artifact grouping and versioning information -->
 	<groupId>com.ottogroup.bi.streaming</groupId>
 	<artifactId>flink-operator-library</artifactId>
-	<version>0.3.5_2.11-SNAPSHOT</version>
+	<version>0.3.6_2.11</version>
 	<packaging>jar</packaging>
 
 	<!-- general project information, eg. name and description -->
