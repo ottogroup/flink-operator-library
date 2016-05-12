@@ -25,12 +25,24 @@ To integrate the library with maven based projects, please add these sections:
 </repositories>
 ``` 
 
+For use with Scala v2.10
 ```json
 <dependencies>
   <dependency>
     <groupId>com.ottogroup.bi.streaming</groupId>
 	<artifactId>flink-operator-library</artifactId>
-	<version>0.3.3</version>  
+	<version>0.3.4_2.10</version>  
+  </dependency>
+</dependencies>
+```
+
+For use with Scala v2.11
+```json
+<dependencies>
+  <dependency>
+    <groupId>com.ottogroup.bi.streaming</groupId>
+	<artifactId>flink-operator-library</artifactId>
+	<version>0.3.4_2.11</version>  
   </dependency>
 </dependencies>
 ```
