@@ -799,6 +799,7 @@ public class JsonContentFilterTest {
 		cfg.addFieldContentMatcher("test3", new FieldConditionConfiguration(new JsonContentReference(new String[]{"test"}, JsonContentType.STRING), FieldConditionOperator.GREATER_THAN, "testtest"));
 		cfg.addFieldContentMatchersCombiner(new FieldConditionCombinerConfiguration(FieldConditionCombiner.AT_MOST, 1, "test1","test2", "test3"));
 		JsonContentFilter filter = new JsonContentFilter(cfg);
+		filter.open(null);
 		Assert.assertFalse(filter.filter(new JSONObject("{\"test\":\"tes\"}")));
 		Assert.assertTrue(filter.filter(new JSONObject("{\"test\":\"testtestt\"}")));		
 	}

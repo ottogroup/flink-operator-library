@@ -24,8 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.Function;
+import org.apache.flink.api.common.functions.RichFilterFunction;
+import org.apache.flink.configuration.Configuration;
 import org.apache.sling.commons.json.JSONObject;
 import org.flinkspector.core.quantify.OutputMatcher;
 import org.hamcrest.Matcher;
@@ -144,12 +145,14 @@ import com.ottogroup.bi.streaming.testing.MatchJSONContent;
  * @author mnxfst
  * @since Jan 12, 2016
  */
-public class JsonContentFilter implements FilterFunction<JSONObject> {
+public class JsonContentFilter extends RichFilterFunction<JSONObject> {
 
 	private static final long serialVersionUID = 4503194679586417037L;
 
+	private JsonContentFilterConfiguration cfg = null;
+	
 	// matcher instance later used for evaluating incoming messages
-	private Matcher<?> jsonContentMatcher = null;
+	private transient Matcher<?> jsonContentMatcher = null;
 
 	/**
 	 * Initializes the filter without any configuration. As the semantics of the filter is defined as
@@ -160,9 +163,13 @@ public class JsonContentFilter implements FilterFunction<JSONObject> {
 	}
 	
 	public JsonContentFilter(final JsonContentFilterConfiguration cfg) throws NoSuchMethodException, IllegalArgumentException, ParseException {
-		this.jsonContentMatcher = buildMatcher(cfg);
+		this.cfg = cfg;
 	}
 	
+	public void open(Configuration parameters) throws Exception {
+		this.jsonContentMatcher = buildMatcher(cfg);
+	}
+
 	/**
 	 * @see org.apache.flink.api.common.functions.RichFilterFunction#filter(java.lang.Object)
 	 */

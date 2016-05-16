@@ -28,10 +28,10 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.ProgramDescription;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
@@ -154,7 +154,7 @@ public abstract class StreamingAppRuntime<T extends StreamingAppConfiguration> i
 	 * @throws ParseException
 	 */
 	protected CommandLine parseCommandLine(final String[] args) throws ParseException {
-		return new DefaultParser().parse(getOptions(), args);
+		return new PosixParser().parse(getOptions(), args);
 	}
 	
 	/**
