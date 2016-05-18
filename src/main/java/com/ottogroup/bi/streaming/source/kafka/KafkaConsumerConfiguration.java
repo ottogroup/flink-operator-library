@@ -37,16 +37,10 @@ public class KafkaConsumerConfiguration implements Serializable {
 	private boolean autoCommit = false;
 	
 	/** comma-separated list of host:port combinations referencing kafka brokers - must not be null and hold at least one character */
-	@JsonProperty(value="brokerList", required=true)
+	@JsonProperty(value="bootstrapServers", required=true)
 	@NotNull 
 	@Size(min=1)
-	private String brokerList = null;
-	
-	/** comma-separated list of host:port combinations referencing zookeeper nodes - must not be null and hold at least one character */
-	@JsonProperty(value="zkConnect", required=true)
-	@NotNull 
-	@Size(min=1)
-	private String zkConnect = null;
+	private String bootstrapServers = null;
 	
 	/** identifier to use when establishing a connection with the kafka cluster - must not be null and hold at least one character */
 	@JsonProperty(value="groupId", required=true)
@@ -63,10 +57,9 @@ public class KafkaConsumerConfiguration implements Serializable {
 	public KafkaConsumerConfiguration() {		
 	}
 	
-	public KafkaConsumerConfiguration(final String topic, final String brokerList, final String zkConnect, final String groupId, final boolean autoCommit) {
+	public KafkaConsumerConfiguration(final String topic, final String bootstrapServers, final String groupId, final boolean autoCommit) {
 		this.topic = topic;
-		this.brokerList = brokerList;
-		this.zkConnect = zkConnect;
+		this.bootstrapServers = bootstrapServers;
 		this.groupId = groupId;
 		this.autoCommit = autoCommit;
 	}
@@ -80,20 +73,12 @@ public class KafkaConsumerConfiguration implements Serializable {
 		this.autoCommit = autoCommit;
 	}
 
-	public String getBrokerList() {
-		return brokerList;
+	public String getBootstrapServers() {
+		return bootstrapServers;
 	}
 
-	public void setBrokerList(String brokerList) {
-		this.brokerList = brokerList;
-	}
-
-	public String getZkConnect() {
-		return zkConnect;
-	}
-
-	public void setZkConnect(String zkConnect) {
-		this.zkConnect = zkConnect;
+	public void setBootstrapServers(String bootstrapServers) {
+		this.bootstrapServers = bootstrapServers;
 	}
 
 	public String getGroupId() {

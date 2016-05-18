@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import org.apache.flink.streaming.util.serialization.DeserializationSchema;
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
+import org.apache.kafka.common.KafkaException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -175,8 +176,7 @@ public class KafkaConsumerBuilderTest {
 		KafkaConsumerBuilder<String> builder = KafkaConsumerBuilder.getInstance();
 		builder.addProperty(KafkaConsumerBuilder.KAFKA_PROPS_AUTO_COMMIT_ENABLE, "true")
 			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_BOOTSTRAP_SERVERS, "servers")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_GROUP_ID, "group")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_ZK_CONNECT, "connect");
+			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_GROUP_ID, "group");
 		builder.deserializationSchema(new SimpleStringSchema());
 		builder.create();
 	}
@@ -199,8 +199,7 @@ public class KafkaConsumerBuilderTest {
 	public void testCreate_withMissingAutoCommitProperty() {
 		KafkaConsumerBuilder<String> builder = KafkaConsumerBuilder.getInstance();
 		builder.addProperty(KafkaConsumerBuilder.KAFKA_PROPS_BOOTSTRAP_SERVERS, "servers")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_GROUP_ID, "group")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_ZK_CONNECT, "connect");
+			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_GROUP_ID, "group");
 		builder.deserializationSchema(new SimpleStringSchema());
 		builder.topic("test");
 		builder.create();
@@ -213,8 +212,7 @@ public class KafkaConsumerBuilderTest {
 	public void testCreate_withMissingBootstrapServersProperty() {
 		KafkaConsumerBuilder<String> builder = KafkaConsumerBuilder.getInstance();
 		builder.addProperty(KafkaConsumerBuilder.KAFKA_PROPS_AUTO_COMMIT_ENABLE, "true")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_GROUP_ID, "group")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_ZK_CONNECT, "connect");
+			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_GROUP_ID, "group");
 		builder.deserializationSchema(new SimpleStringSchema());
 		builder.topic("test");
 		builder.create();
@@ -227,18 +225,17 @@ public class KafkaConsumerBuilderTest {
 	public void testCreate_withMissingGroupIdProperty() {
 		KafkaConsumerBuilder<String> builder = KafkaConsumerBuilder.getInstance();
 		builder.addProperty(KafkaConsumerBuilder.KAFKA_PROPS_AUTO_COMMIT_ENABLE, "true")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_BOOTSTRAP_SERVERS, "servers")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_ZK_CONNECT, "connect");
+			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_BOOTSTRAP_SERVERS, "servers");
 		builder.deserializationSchema(new SimpleStringSchema());
 		builder.topic("test");
 		builder.create();
 	}
-	
+
 	/**
-	 * Test case for {@link KafkaConsumerBuilder#create()} with missing zk connect property
+	 * Test case for {@link KafkaConsumerBuilder#create()} with all properties but invalid host:port combination
 	 */
-	@Test(expected=IllegalArgumentException.class)
-	public void testCreate_withMissingZkConnectProperty() {
+	@Test(expected=KafkaException.class)
+	public void testCreate_withInvalidHostPortCombinationKafka09() {
 		KafkaConsumerBuilder<String> builder = KafkaConsumerBuilder.getInstance();
 		builder.addProperty(KafkaConsumerBuilder.KAFKA_PROPS_AUTO_COMMIT_ENABLE, "true")
 			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_BOOTSTRAP_SERVERS, "servers")
@@ -251,28 +248,12 @@ public class KafkaConsumerBuilderTest {
 	/**
 	 * Test case for {@link KafkaConsumerBuilder#create()} with all properties but invalid host:port combination
 	 */
-	@Test(expected=IllegalArgumentException.class)
-	public void testCreate_withInvalidHostPortCombinationKafka081() {
-		KafkaConsumerBuilder<String> builder = KafkaConsumerBuilder.getInstance();
-		builder.addProperty(KafkaConsumerBuilder.KAFKA_PROPS_AUTO_COMMIT_ENABLE, "true")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_BOOTSTRAP_SERVERS, "servers")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_GROUP_ID, "group")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_ZK_CONNECT, "connect");
-		builder.deserializationSchema(new SimpleStringSchema());
-		builder.topic("test");
-		builder.create();
-	}
-
-	/**
-	 * Test case for {@link KafkaConsumerBuilder#create()} with all properties but invalid host:port combination
-	 */
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected=KafkaException.class)
 	public void testCreate_withInvalidHostPortCombinationKafka082() {
 		KafkaConsumerBuilder<String> builder = KafkaConsumerBuilder.getInstance();
 		builder.addProperty(KafkaConsumerBuilder.KAFKA_PROPS_AUTO_COMMIT_ENABLE, "true")
 			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_BOOTSTRAP_SERVERS, "servers")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_GROUP_ID, "group")
-			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_ZK_CONNECT, "connect");
+			   .addProperty(KafkaConsumerBuilder.KAFKA_PROPS_GROUP_ID, "group");
 		builder.deserializationSchema(new SimpleStringSchema());
 		builder.topic("test");
 		builder.create();

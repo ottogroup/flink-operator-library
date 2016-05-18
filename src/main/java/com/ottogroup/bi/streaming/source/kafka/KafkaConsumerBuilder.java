@@ -20,7 +20,7 @@ import java.io.Serializable;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer08;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer09;
 import org.apache.flink.streaming.util.serialization.DeserializationSchema;
 
 /**
@@ -31,15 +31,14 @@ import org.apache.flink.streaming.util.serialization.DeserializationSchema;
 public class KafkaConsumerBuilder<T extends Serializable> implements Serializable {
 
 	private static final long serialVersionUID = -3497945088790519194L;
-	
-	public static final String KAFKA_PROPS_ZK_CONNECT = "zookeeper.connect";
+
 	public static final String KAFKA_PROPS_GROUP_ID = "group.id";
-	public static final String KAFKA_PROPS_AUTO_COMMIT_ENABLE = "auto.commit.enable";
+	public static final String KAFKA_PROPS_AUTO_COMMIT_ENABLE = "enable.auto.commit";
 	public static final String KAFKA_PROPS_BOOTSTRAP_SERVERS = "bootstrap.servers";
 
 	
 	private Properties properties = new Properties();
-	private String topic;
+	private String topic;	
 	private DeserializationSchema<T> deserializationSchema;
 	
 	private KafkaConsumerBuilder() {
@@ -104,7 +103,7 @@ public class KafkaConsumerBuilder<T extends Serializable> implements Serializabl
 	 * @param version
 	 * @return
 	 */
-	public FlinkKafkaConsumer08<T> create() {
+	public FlinkKafkaConsumer09<T> create() {
 		
 		/////////////////////////////////////////////////////////////////////////
 		// validate provided input
@@ -118,11 +117,9 @@ public class KafkaConsumerBuilder<T extends Serializable> implements Serializabl
 			throw new IllegalArgumentException("Missing value for required property '"+KAFKA_PROPS_BOOTSTRAP_SERVERS+"'");
 		if(!this.properties.containsKey(KAFKA_PROPS_GROUP_ID))
 			throw new IllegalArgumentException("Missing value for required property '"+KAFKA_PROPS_GROUP_ID+"'");
-		if(!this.properties.containsKey(KAFKA_PROPS_ZK_CONNECT))
-			throw new IllegalArgumentException("Missing value for required property '"+KAFKA_PROPS_ZK_CONNECT+"'");
 		/////////////////////////////////////////////////////////////////////////
 
-		return new FlinkKafkaConsumer08<>(this.topic, this.deserializationSchema, this.properties);
+		return new FlinkKafkaConsumer09<>(this.topic, this.deserializationSchema, this.properties);
 	}
 
 	/**

@@ -20,8 +20,10 @@ import java.io.Serializable;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer08;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer09;
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
+
+import com.ottogroup.bi.streaming.source.kafka.KafkaConsumerBuilder;
 
 /**
  * Provides support for creating {@link FlinkKafkaProducer08} instances
@@ -93,11 +95,11 @@ public class KafkaProducerBuilder implements Serializable {
 	}
 	
 	/**
-	 * Create a {@link FlinkKafkaConsumer} depending on the provided settings
+	 * Create a {@link FlinkKafkaProducer09} depending on the provided settings
 	 * @param version
 	 * @return
 	 */
-	public FlinkKafkaProducer08<String> create() {
+	public FlinkKafkaProducer09<String> create() {
 		
 		/////////////////////////////////////////////////////////////////////////
 		// validate provided input
@@ -107,7 +109,7 @@ public class KafkaProducerBuilder implements Serializable {
 			throw new IllegalArgumentException("Missing required broker list");
 		/////////////////////////////////////////////////////////////////////////
 
-		return new FlinkKafkaProducer08<String>(this.brokerList, this.topic, new SimpleStringSchema());		
+		return new FlinkKafkaProducer09<String>(this.brokerList, this.topic, new SimpleStringSchema());		
 	}
 	
 	/**

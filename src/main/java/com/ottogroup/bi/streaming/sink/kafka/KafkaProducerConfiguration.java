@@ -21,8 +21,6 @@ import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer08;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
