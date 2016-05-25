@@ -114,7 +114,7 @@ public class KafkaProducerBuilderTest {
 	 */
 	@Test
 	public void testAddProperty_withNullKey() {
-		KafkaProducerBuilder builder = KafkaProducerBuilder.getInstance();
+		KafkaProducerBuilder<String> builder = KafkaProducerBuilder.getInstance();
 		Assert.assertTrue(builder.getProperties().isEmpty());		
 		builder = builder.addProperty(null, "");
 		Assert.assertTrue(builder.getProperties().isEmpty());		
@@ -126,7 +126,7 @@ public class KafkaProducerBuilderTest {
 	 */
 	@Test
 	public void testAddProperty_withValidKeyAndNullValue() {
-		KafkaProducerBuilder builder = KafkaProducerBuilder.getInstance();
+		KafkaProducerBuilder<String> builder = KafkaProducerBuilder.getInstance();
 		Assert.assertTrue(builder.getProperties().isEmpty());		
 		builder = builder.addProperty("test", null);
 		Assert.assertTrue(builder.getProperties().isEmpty());		
@@ -138,7 +138,7 @@ public class KafkaProducerBuilderTest {
 	 */
 	@Test
 	public void testAddProperty_withValidKeyAndEmptyValue() {
-		KafkaProducerBuilder builder = KafkaProducerBuilder.getInstance();
+		KafkaProducerBuilder<String> builder = KafkaProducerBuilder.getInstance();
 		Assert.assertTrue(builder.getProperties().isEmpty());		
 		builder = builder.addProperty("test", "");
 		Assert.assertEquals("", builder.getProperties().get("test"));		
@@ -150,7 +150,7 @@ public class KafkaProducerBuilderTest {
 	 */
 	@Test
 	public void testAddProperties_withNullInput() {
-		KafkaProducerBuilder builder = KafkaProducerBuilder.getInstance();
+		KafkaProducerBuilder<String> builder = KafkaProducerBuilder.getInstance();
 		Assert.assertTrue(builder.getProperties().isEmpty());		
 		builder = builder.addProperties(null);
 		Assert.assertTrue(builder.getProperties().isEmpty());		
@@ -162,7 +162,7 @@ public class KafkaProducerBuilderTest {
 	 */
 	@Test
 	public void testAddProperties_withEmptyInput() {
-		KafkaProducerBuilder builder = KafkaProducerBuilder.getInstance();
+		KafkaProducerBuilder<String> builder = KafkaProducerBuilder.getInstance();
 		Assert.assertTrue(builder.getProperties().isEmpty());		
 		builder = builder.addProperties(new Properties());
 		Assert.assertTrue(builder.getProperties().isEmpty());		
@@ -179,7 +179,7 @@ public class KafkaProducerBuilderTest {
 		props.put("test-1", "value-1");
 		props.put("test-2", "value-2");
 		
-		KafkaProducerBuilder builder = KafkaProducerBuilder.getInstance();
+		KafkaProducerBuilder<String> builder = KafkaProducerBuilder.getInstance();
 		Assert.assertTrue(builder.getProperties().isEmpty());		
 		builder = builder.addProperties(props);
 		Assert.assertEquals(2, builder.getProperties().size());

@@ -21,7 +21,8 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer09;
-import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
+import org.apache.flink.streaming.util.serialization.SerializationSchema;
+import org.apache.kafka.clients.producer.ProducerConfig;
 
 import com.ottogroup.bi.streaming.source.kafka.KafkaConsumerBuilder;
 
@@ -30,13 +31,14 @@ import com.ottogroup.bi.streaming.source.kafka.KafkaConsumerBuilder;
  * @author mnxfst
  * @since Feb 29, 2016
  */
-public class KafkaProducerBuilder implements Serializable {
+public class KafkaProducerBuilder<T extends Serializable> implements Serializable {
 
 	private static final long serialVersionUID = 878130140393093604L;
 
 	private Properties properties = new Properties();
 	private String topic;
 	private String brokerList;
+	private SerializationSchema<T> serializationSchema;
 
 	private KafkaProducerBuilder() {
 	}
@@ -45,8 +47,8 @@ public class KafkaProducerBuilder implements Serializable {
 	 * Returns a new {@link KafkaConsumerBuilder} instance
 	 * @return
 	 */
-	public static KafkaProducerBuilder getInstance() {
-		return new KafkaProducerBuilder();
+	public static <T extends Serializable> KafkaProducerBuilder<T> getInstance() {
+		return new KafkaProducerBuilder<T>();
 	}
 	
 	/**
@@ -54,7 +56,7 @@ public class KafkaProducerBuilder implements Serializable {
 	 * @param topic
 	 * @return
 	 */
-	public KafkaProducerBuilder topic(final String topic) {
+	public KafkaProducerBuilder<T> topic(final String topic) {
 		if(StringUtils.isNotBlank(topic))
 			this.topic = topic;
 		return this;
@@ -65,7 +67,7 @@ public class KafkaProducerBuilder implements Serializable {
 	 * @param topic
 	 * @return
 	 */
-	public KafkaProducerBuilder brokerList(final String brokerList) {
+	public KafkaProducerBuilder<T> brokerList(final String brokerList) {
 		if(StringUtils.isNotBlank(brokerList))
 			this.brokerList = brokerList;
 		return this;
@@ -77,7 +79,7 @@ public class KafkaProducerBuilder implements Serializable {
 	 * @param value
 	 * @return
 	 */
-	public KafkaProducerBuilder addProperty(final String key, final String value) {
+	public KafkaProducerBuilder<T> addProperty(final String key, final String value) {
 		if(StringUtils.isNotBlank(key) && value != null)
 			this.properties.put(StringUtils.lowerCase(StringUtils.trim(key)), value);
 		return this;
@@ -88,18 +90,31 @@ public class KafkaProducerBuilder implements Serializable {
 	 * @param properties
 	 * @return
 	 */
-	public KafkaProducerBuilder addProperties(final Properties properties) {
+	public KafkaProducerBuilder<T> addProperties(final Properties properties) {
 		if(properties != null && !properties.isEmpty())
 			this.properties.putAll(properties);
 		return this;
 	}
+	
+	
+	/**
+	 * Sets the {@link SerializationSchema} required for writing data to kafka topic 
+	 * @param serializationSchema
+	 * @return
+	 */
+	public KafkaProducerBuilder<T> serializationSchema(final SerializationSchema<T> serializationSchema) {
+		if(serializationSchema != null)
+			this.serializationSchema = serializationSchema;
+		return this;
+	}
+
 	
 	/**
 	 * Create a {@link FlinkKafkaProducer09} depending on the provided settings
 	 * @param version
 	 * @return
 	 */
-	public FlinkKafkaProducer09<String> create() {
+	public FlinkKafkaProducer09<T> create() {
 		
 		/////////////////////////////////////////////////////////////////////////
 		// validate provided input
@@ -109,7 +124,15 @@ public class KafkaProducerBuilder implements Serializable {
 			throw new IllegalArgumentException("Missing required broker list");
 		/////////////////////////////////////////////////////////////////////////
 
-		return new FlinkKafkaProducer09<String>(this.brokerList, this.topic, new SimpleStringSchema());		
+		if(!this.properties.isEmpty()) {
+			Properties producerProperties = new Properties();
+			producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.brokerList);
+
+			for(Object k : this.properties.keySet())
+				producerProperties.put(k, this.properties.get(k));			
+			return new FlinkKafkaProducer09<>(this.topic, this.serializationSchema, producerProperties);
+		}
+		return new FlinkKafkaProducer09<T>(this.brokerList, this.topic, this.serializationSchema);		
 	}
 	
 	/**
