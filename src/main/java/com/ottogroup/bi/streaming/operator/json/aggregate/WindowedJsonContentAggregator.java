@@ -295,7 +295,7 @@ public class WindowedJsonContentAggregator implements AllWindowFunction<JSONObje
 			
 		switch(method) {
 			case AVG: {
-				return function.average((MutablePair<Serializable, Integer>)existingValue, (Integer)newValue);
+				return function.average((MutablePair<Serializable, Integer>)existingValue, newValue);
 			}
 			case MIN: {
 				return function.min(existingValue, newValue);
