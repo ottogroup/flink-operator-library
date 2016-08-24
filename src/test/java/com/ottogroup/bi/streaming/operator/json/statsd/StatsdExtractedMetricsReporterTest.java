@@ -304,7 +304,7 @@ public class StatsdExtractedMetricsReporterTest {
 	/**
 	 * Test case for {@link StatsdExtractedMetricsReporter#reportGauge(StatsdMetricConfig, JSONObject)} being provided null as input to config parameter
 	 */
-	@Test
+	@Test(expected=NullPointerException.class)
 	public void testReportGauge_withNullConfiguration() throws Exception {
 		final StatsDClient client = Mockito.mock(StatsDClient.class);
 		StatsdExtractedMetricsReporterConfiguration cfg = new StatsdExtractedMetricsReporterConfiguration("host", 8125, "prefix");
@@ -374,6 +374,36 @@ public class StatsdExtractedMetricsReporterTest {
 		Mockito.verify(client).gauge("reportValue", Long.valueOf(123));
 	}
 
+	/**
+	 * Test case for {@link StatsdExtractedMetricsReporter#reportGauge(StatsdMetricConfig, JSONObject)} being provided a json which has a value at the referenced location and
+	 * a dynamic prefix is requested
+	 */
+	@Test
+	public void testReportGauge_withJSONHavingIntValueAtLocationAndDynamicPrefix() throws Exception {
+		final StatsDClient client = Mockito.mock(StatsDClient.class);
+		StatsdExtractedMetricsReporterConfiguration cfg = new StatsdExtractedMetricsReporterConfiguration("host", 8125, "prefix");
+		cfg.addMetricConfig(new StatsdMetricConfig("path.to.field", new JsonContentReference(new String[]{"prefix"}, JsonContentType.STRING), StatsdMetricType.COUNTER, new JsonContentReference(new String[]{"path","field"}, JsonContentType.INTEGER), false));		
+		StatsdExtractedMetricsReporter reporter = new StatsdExtractedMetricsReporter(cfg);
+		reporter.setStatsdClient(client);
+		reporter.reportGauge(new StatsdMetricConfig("reportValue", new JsonContentReference(new String[]{"prefix"}, JsonContentType.STRING), StatsdMetricType.GAUGE, new JsonContentReference(new String[]{"key"}, JsonContentType.INTEGER), false), new JSONObject("{\"prefix\":\"pref\",\"key\":123}"));
+		Mockito.verify(client).gauge("pref.reportValue", Long.valueOf(123));
+	}
+
+	/**
+	 * Test case for {@link StatsdExtractedMetricsReporter#reportGauge(StatsdMetricConfig, JSONObject)} being provided a json which has a value at the referenced location and
+	 * a dynamic prefix is requested (but no value at location)
+	 */
+	@Test
+	public void testReportGauge_withJSONHavingIntValueAtLocationAndDynamicPrefixButNoValue() throws Exception {
+		final StatsDClient client = Mockito.mock(StatsDClient.class);
+		StatsdExtractedMetricsReporterConfiguration cfg = new StatsdExtractedMetricsReporterConfiguration("host", 8125, "prefix");
+		cfg.addMetricConfig(new StatsdMetricConfig("path.to.field", new JsonContentReference(new String[]{"prefix"}, JsonContentType.STRING), StatsdMetricType.COUNTER, new JsonContentReference(new String[]{"path","field"}, JsonContentType.INTEGER), false));		
+		StatsdExtractedMetricsReporter reporter = new StatsdExtractedMetricsReporter(cfg);
+		reporter.setStatsdClient(client);
+		reporter.reportGauge(new StatsdMetricConfig("reportValue", new JsonContentReference(new String[]{"prefix"}, JsonContentType.STRING), StatsdMetricType.GAUGE, new JsonContentReference(new String[]{"key"}, JsonContentType.INTEGER), false), new JSONObject("{\"key\":123}"));
+		Mockito.verify(client).gauge("reportValue", Long.valueOf(123));
+	}
+	
 	/**
 	 * Test case for {@link StatsdExtractedMetricsReporter#reportCounter(StatsdMetricConfig, JSONObject)} being provided null as input to config parameter
 	 */
@@ -464,7 +494,34 @@ public class StatsdExtractedMetricsReporterTest {
 		reporter.reportCounter(new StatsdMetricConfig("path.to.field", StatsdMetricType.COUNTER, new JsonContentReference(new String[]{"key"}, JsonContentType.INTEGER), false), new JSONObject("{\"key\":123}"));
 		Mockito.verify(client).incrementCounter("path.to.field");
 	}
-	
+
+	/**
+	 * Test case for {@link StatsdExtractedMetricsReporter#reportCounter(StatsdMetricConfig, JSONObject)} being provided valid input but request to report no delta but count (with prefix) 
+	 */
+	@Test
+	public void testReportCounter_withJSONAndCountOnlyRequestAndReportPrefix() throws Exception {
+		final StatsDClient client = Mockito.mock(StatsDClient.class);
+		StatsdExtractedMetricsReporterConfiguration cfg = new StatsdExtractedMetricsReporterConfiguration("host", 8125, "prefix");		
+		cfg.addMetricConfig(new StatsdMetricConfig("path.to.field", StatsdMetricType.COUNTER, new JsonContentReference(new String[]{"path","field"}, JsonContentType.INTEGER), true));		
+		StatsdExtractedMetricsReporter reporter = new StatsdExtractedMetricsReporter(cfg);		
+		reporter.setStatsdClient(client);
+		reporter.reportCounter(new StatsdMetricConfig("path.to.field", new JsonContentReference(new String[]{"prefix"}, JsonContentType.STRING), StatsdMetricType.COUNTER, new JsonContentReference(new String[]{"key"}, JsonContentType.INTEGER), false), new JSONObject("{\"prefix\":\"pref\",\"key\":123}"));
+		Mockito.verify(client).incrementCounter("pref.path.to.field");
+	}
+
+	/**
+	 * Test case for {@link StatsdExtractedMetricsReporter#reportCounter(StatsdMetricConfig, JSONObject)} being provided valid input but request to report no delta but count (with prefix but no content) 
+	 */
+	@Test
+	public void testReportCounter_withJSONAndCountOnlyRequestAndReportPrefixNoContent() throws Exception {
+		final StatsDClient client = Mockito.mock(StatsDClient.class);
+		StatsdExtractedMetricsReporterConfiguration cfg = new StatsdExtractedMetricsReporterConfiguration("host", 8125, "prefix");		
+		cfg.addMetricConfig(new StatsdMetricConfig("path.to.field", StatsdMetricType.COUNTER, new JsonContentReference(new String[]{"path","field"}, JsonContentType.INTEGER), true));		
+		StatsdExtractedMetricsReporter reporter = new StatsdExtractedMetricsReporter(cfg);		
+		reporter.setStatsdClient(client);
+		reporter.reportCounter(new StatsdMetricConfig("path.to.field", new JsonContentReference(new String[]{"prefix"}, JsonContentType.STRING), StatsdMetricType.COUNTER, new JsonContentReference(new String[]{"key"}, JsonContentType.INTEGER), false), new JSONObject("{\"prefix\":\"\",\"key\":123}"));
+		Mockito.verify(client).incrementCounter("path.to.field");
+	}
 
 	/**
 	 * Test case for {@link StatsdExtractedMetricsReporter#reportTime(StatsdMetricConfig, JSONObject)} being provided null as input to config parameter
@@ -600,6 +657,48 @@ public class StatsdExtractedMetricsReporterTest {
 		Date expected = f.parse(f.format(now));
 		
 		reporter.reportTime(new StatsdMetricConfig("path.to.field", StatsdMetricType.TIME, new JsonContentReference(new String[]{"key"}, JsonContentType.TIMESTAMP, "yyyyMMdd")), new JSONObject("{\"key\":\""+f.format(now)+"\"}"));
+		Mockito.verify(client).recordExecutionTimeToNow("path.to.field", expected.getTime());
+		Mockito.verify(client, Mockito.never()).recordExecutionTime(Mockito.anyString(), Mockito.anyLong());
+	}
+
+	/**
+	 * Test case for {@link StatsdExtractedMetricsReporter#reportTime(StatsdMetricConfig, JSONObject)} being provided a json which returns an integer for selected path.
+	 * Value is reported as execution time --> computation (and prefix)
+	 */
+	@Test
+	public void testReportTime_withJSONHavingTimestampValueAtLocationCalcAndPrefix() throws Exception {
+		final StatsDClient client = Mockito.mock(StatsDClient.class);
+		StatsdExtractedMetricsReporterConfiguration cfg = new StatsdExtractedMetricsReporterConfiguration("host", 8125, "prefix");		
+		cfg.addMetricConfig(new StatsdMetricConfig("path.to.field", StatsdMetricType.TIME, new JsonContentReference(new String[]{"path","field"}, JsonContentType.INTEGER), true));		
+		StatsdExtractedMetricsReporter reporter = new StatsdExtractedMetricsReporter(cfg);		
+		reporter.setStatsdClient(client);
+		
+		SimpleDateFormat f = new SimpleDateFormat("yyyyMMdd");
+		Date now = new Date();
+		Date expected = f.parse(f.format(now));
+		
+		reporter.reportTime(new StatsdMetricConfig("path.to.field", new JsonContentReference(new String[]{"prefix"}, JsonContentType.STRING), StatsdMetricType.TIME, new JsonContentReference(new String[]{"key"}, JsonContentType.TIMESTAMP, "yyyyMMdd")), new JSONObject("{\"prefix\":\"pref\",\"key\":\""+f.format(now)+"\"}"));
+		Mockito.verify(client).recordExecutionTimeToNow("pref.path.to.field", expected.getTime());
+		Mockito.verify(client, Mockito.never()).recordExecutionTime(Mockito.anyString(), Mockito.anyLong());
+	}
+
+	/**
+	 * Test case for {@link StatsdExtractedMetricsReporter#reportTime(StatsdMetricConfig, JSONObject)} being provided a json which returns an integer for selected path.
+	 * Value is reported as execution time --> computation (and prefix but no value)
+	 */
+	@Test
+	public void testReportTime_withJSONHavingTimestampValueAtLocationCalcAndPrefixButNoValue() throws Exception {
+		final StatsDClient client = Mockito.mock(StatsDClient.class);
+		StatsdExtractedMetricsReporterConfiguration cfg = new StatsdExtractedMetricsReporterConfiguration("host", 8125, "prefix");		
+		cfg.addMetricConfig(new StatsdMetricConfig("path.to.field", StatsdMetricType.TIME, new JsonContentReference(new String[]{"path","field"}, JsonContentType.INTEGER), true));		
+		StatsdExtractedMetricsReporter reporter = new StatsdExtractedMetricsReporter(cfg);		
+		reporter.setStatsdClient(client);
+		
+		SimpleDateFormat f = new SimpleDateFormat("yyyyMMdd");
+		Date now = new Date();
+		Date expected = f.parse(f.format(now));
+		
+		reporter.reportTime(new StatsdMetricConfig("path.to.field", new JsonContentReference(new String[]{"prefix"}, JsonContentType.STRING), StatsdMetricType.TIME, new JsonContentReference(new String[]{"key"}, JsonContentType.TIMESTAMP, "yyyyMMdd")), new JSONObject("{\"key\":\""+f.format(now)+"\"}"));
 		Mockito.verify(client).recordExecutionTimeToNow("path.to.field", expected.getTime());
 		Mockito.verify(client, Mockito.never()).recordExecutionTime(Mockito.anyString(), Mockito.anyLong());
 	}

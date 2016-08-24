@@ -38,6 +38,9 @@ public class StatsdMetricConfig implements Serializable {
 	@Size(min=1)
 	private String path = null;
 	
+	@JsonProperty(value="dynamicPathPrefix", required=false)
+	private JsonContentReference dynamicPathPrefix = null; 
+	
 	@JsonProperty(value="type", required=true)
 	@NotNull
 	private StatsdMetricType type = null;
@@ -62,6 +65,13 @@ public class StatsdMetricConfig implements Serializable {
 		this.jsonRef = jsonRef;
 	}
 	
+	public StatsdMetricConfig(final String path, final JsonContentReference dynamicPathPrefix, final StatsdMetricType type, final JsonContentReference jsonRef) {
+		this.path = path;
+		this.dynamicPathPrefix = dynamicPathPrefix;
+		this.type = type;
+		this.jsonRef = jsonRef;
+	}
+	
 	public StatsdMetricConfig(final String path, final StatsdMetricType type, final JsonContentReference jsonRef, final boolean reportDelta) {
 		this.path = path;
 		this.type = type;
@@ -69,8 +79,25 @@ public class StatsdMetricConfig implements Serializable {
 		this.reportDelta = reportDelta;
 	}
 	
+	public StatsdMetricConfig(final String path, final JsonContentReference dynamicPathPrefix, final StatsdMetricType type, final JsonContentReference jsonRef, final boolean reportDelta) {
+		this.path = path;
+		this.dynamicPathPrefix = dynamicPathPrefix;
+		this.type = type;
+		this.jsonRef = jsonRef;
+		this.reportDelta = reportDelta;
+	}
+	
 	public StatsdMetricConfig(final String path, final StatsdMetricType type, final JsonContentReference jsonRef, final boolean reportDelta, final long scaleFactor) {
 		this.path = path;
+		this.type = type;
+		this.jsonRef = jsonRef;
+		this.reportDelta = reportDelta;
+		this.scaleFactor = scaleFactor;
+	}
+	
+	public StatsdMetricConfig(final String path, final JsonContentReference dynamicPathPrefix, final StatsdMetricType type, final JsonContentReference jsonRef, final boolean reportDelta, final long scaleFactor) {
+		this.path = path;
+		this.dynamicPathPrefix = dynamicPathPrefix;
 		this.type = type;
 		this.jsonRef = jsonRef;
 		this.reportDelta = reportDelta;
@@ -99,6 +126,14 @@ public class StatsdMetricConfig implements Serializable {
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	public JsonContentReference getDynamicPathPrefix() {
+		return dynamicPathPrefix;
+	}
+
+	public void setDynamicPathPrefix(JsonContentReference dynamicPathPrefix) {
+		this.dynamicPathPrefix = dynamicPathPrefix;
 	}
 
 	public StatsdMetricType getType() {

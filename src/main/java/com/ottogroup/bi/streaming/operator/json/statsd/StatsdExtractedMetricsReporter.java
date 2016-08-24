@@ -148,13 +148,27 @@ public class StatsdExtractedMetricsReporter extends RichFilterFunction<JSONObjec
 	 * 			The {@link JSONObject} to extract information from. Value is expected not to be null
 	 */
 	protected void reportGauge(final StatsdMetricConfig metricCfg, final JSONObject json) {
-		if(metricCfg == null)
-			return;
+		String path = null;
+		if(metricCfg.getDynamicPathPrefix() != null) {
+			try {
+				String dynPathPrefix = this.jsonUtils.getTextFieldValue(json, metricCfg.getDynamicPathPrefix().getPath(), false);
+				if(StringUtils.isNotBlank(dynPathPrefix))					
+					path = dynPathPrefix + (!StringUtils.endsWith(dynPathPrefix, ".") ? "." : "") + metricCfg.getPath();
+				else 
+					path = metricCfg.getPath();
+			} catch(Exception e) {
+				// do nothing
+				path = metricCfg.getPath();
+			}
+		} else {
+			path = metricCfg.getPath();
+		}
+		
 		if(metricCfg.getJsonRef().getContentType() == JsonContentType.INTEGER) {
 			try {
 				final Integer value = this.jsonUtils.getIntegerFieldValue(json, metricCfg.getJsonRef().getPath());
 				if(value != null)
-					this.statsdClient.gauge(metricCfg.getPath(), (metricCfg.getScaleFactor() != 1 ? value.longValue() * metricCfg.getScaleFactor() : value.longValue()));
+					this.statsdClient.gauge(path, (metricCfg.getScaleFactor() != 1 ? value.longValue() * metricCfg.getScaleFactor() : value.longValue()));
 			} catch(Exception e) {
 				// do nothing
 			}
@@ -162,7 +176,7 @@ public class StatsdExtractedMetricsReporter extends RichFilterFunction<JSONObjec
 			try {
 				final Double value = this.jsonUtils.getDoubleFieldValue(json, metricCfg.getJsonRef().getPath());
 				if(value != null)
-					this.statsdClient.gauge(metricCfg.getPath(), (metricCfg.getScaleFactor() != 1 ? (long)(value.doubleValue() * metricCfg.getScaleFactor()) : value.longValue()));
+					this.statsdClient.gauge(path, (metricCfg.getScaleFactor() != 1 ? (long)(value.doubleValue() * metricCfg.getScaleFactor()) : value.longValue()));
 			} catch(Exception e) {
 				// do nothing
 			}
@@ -177,15 +191,32 @@ public class StatsdExtractedMetricsReporter extends RichFilterFunction<JSONObjec
 	 * 			The {@link JSONObject} to extract information from. Value is expected not to be null
 	 */
 	protected void reportCounter(final StatsdMetricConfig metricCfg, final JSONObject json) {		
+		String path = null;
+		if(metricCfg.getDynamicPathPrefix() != null) {
+			try {
+				String dynPathPrefix = this.jsonUtils.getTextFieldValue(json, metricCfg.getDynamicPathPrefix().getPath(), false);
+				if(StringUtils.isNotBlank(dynPathPrefix))					
+					path = dynPathPrefix + (!StringUtils.endsWith(dynPathPrefix, ".") ? "." : "") + metricCfg.getPath();
+				else 
+					path = metricCfg.getPath();
+			} catch(Exception e) {
+				// do nothing
+				path = metricCfg.getPath();
+			}
+		} else {
+			path = metricCfg.getPath();
+		}
+
 		if(!metricCfg.isReportDelta()) { 
-			this.statsdClient.incrementCounter(metricCfg.getPath());
+			this.statsdClient.incrementCounter(path);
 			return;
 		} 
+		
 		if(metricCfg.getJsonRef().getContentType() == JsonContentType.INTEGER) {
 			try {
 				final Integer value = this.jsonUtils.getIntegerFieldValue(json, metricCfg.getJsonRef().getPath());
 				if(value != null)
-					this.statsdClient.count(metricCfg.getPath(), (metricCfg.getScaleFactor() != 1 ? value.longValue() * metricCfg.getScaleFactor() : value.longValue()));
+					this.statsdClient.count(path, (metricCfg.getScaleFactor() != 1 ? value.longValue() * metricCfg.getScaleFactor() : value.longValue()));
 			} catch(Exception e) {
 				// do nothing
 			}
@@ -193,7 +224,7 @@ public class StatsdExtractedMetricsReporter extends RichFilterFunction<JSONObjec
 			try {
 				final Double value = this.jsonUtils.getDoubleFieldValue(json, metricCfg.getJsonRef().getPath());
 				if(value != null)
-					this.statsdClient.count(metricCfg.getPath(), (metricCfg.getScaleFactor() != 1 ? (long)(value.doubleValue() * metricCfg.getScaleFactor()) : value.longValue()));
+					this.statsdClient.count(path, (metricCfg.getScaleFactor() != 1 ? (long)(value.doubleValue() * metricCfg.getScaleFactor()) : value.longValue()));
 			} catch(Exception e) {
 				// do nothing
 			}
@@ -208,12 +239,27 @@ public class StatsdExtractedMetricsReporter extends RichFilterFunction<JSONObjec
 	 * 			The {@link JSONObject} to extract information from. Value is expected not to be null
 	 */
 	protected void reportTime(final StatsdMetricConfig metricCfg, final JSONObject json) {
+		String path = null;
+		if(metricCfg.getDynamicPathPrefix() != null) {
+			try {
+				String dynPathPrefix = this.jsonUtils.getTextFieldValue(json, metricCfg.getDynamicPathPrefix().getPath(), false);
+				if(StringUtils.isNotBlank(dynPathPrefix))					
+					path = dynPathPrefix + (!StringUtils.endsWith(dynPathPrefix, ".") ? "." : "") + metricCfg.getPath();
+				else 
+					path = metricCfg.getPath();
+			} catch(Exception e) {
+				// do nothing
+				path = metricCfg.getPath();
+			}
+		} else {
+			path = metricCfg.getPath();
+		}
 
 		if(metricCfg.getJsonRef().getContentType() == JsonContentType.INTEGER) {
 			try {
 				final Integer value = this.jsonUtils.getIntegerFieldValue(json, metricCfg.getJsonRef().getPath());
 				if(value != null)
-					this.statsdClient.recordExecutionTime(metricCfg.getPath(), value.longValue());
+					this.statsdClient.recordExecutionTime(path, value.longValue());
 			} catch(Exception e) {
 				// do nothing
 			}
@@ -221,7 +267,7 @@ public class StatsdExtractedMetricsReporter extends RichFilterFunction<JSONObjec
 			try {
 				final Date value = this.jsonUtils.getDateTimeFieldValue(json, metricCfg.getJsonRef().getPath(), metricCfg.getJsonRef().getConversionPattern());
 				if(value != null)
-					this.statsdClient.recordExecutionTimeToNow(metricCfg.getPath(), value.getTime()); 
+					this.statsdClient.recordExecutionTimeToNow(path, value.getTime()); 
 			} catch(Exception e) {
 				// do nothing
 			}			
