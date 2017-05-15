@@ -900,7 +900,36 @@ public class WindowedJsonContentAggregatorTest {
 		values.put("test.id2","value-2");
 		
 		// TODO check as this may lead to evaluation errors as the set of keys may be iterated in different order as the order is not guaranteed
-		Assert.assertEquals("{\"aggregatedValues\":{\"test\":{\"id1\":\"value-1\",\"id2\":\"value-2\"}}}", new WindowedJsonContentAggregator("id", 
-				new AggregatorConfiguration()).addAggregatedValues(new JSONObject(), null, values).toString());
+        Assert.assertEquals("{\"aggregatedValues\":{\"test\":{\"id1\":\"value-1\",\"id2\":\"value-2\"}}}", new WindowedJsonContentAggregator("id", 
+                new AggregatorConfiguration()).addAggregatedValues(new JSONObject(), null, values).toString());
 	}
+	
+	
+	/**
+     * Test case for {@link WindowedJsonContentAggregator#addAggregatedValues(JSONObject, String, Map)} being
+     * provided a two-element map where the key references a single level and a non-finite number 
+     */
+    @Test
+    public void testAddAggregatedValues_withOneElementMapAndNonFiniteNumber() throws Exception {
+        Map<String, Serializable> values = new HashMap<>();
+        values.put("test.id1","value-1");
+        values.put("test.id2",Double.POSITIVE_INFINITY);
+        
+        // TODO check as this may lead to evaluation errors as the set of keys may be iterated in different order as the order is not guaranteed
+        Assert.assertEquals("{\"aggregatedValues\":{\"test\":{\"id1\":\"value-1\"}}}", new WindowedJsonContentAggregator("id", 
+                new AggregatorConfiguration()).addAggregatedValues(new JSONObject(), null, values).toString());
+    }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
