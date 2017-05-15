@@ -37,6 +37,7 @@ import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
 
+import com.esotericsoftware.minlog.Log;
 import com.ottogroup.bi.streaming.operator.json.JsonContentReference;
 import com.ottogroup.bi.streaming.operator.json.JsonContentType;
 import com.ottogroup.bi.streaming.operator.json.JsonProcessingUtils;
@@ -461,7 +462,16 @@ public class WindowedJsonContentAggregator implements AllWindowFunction<JSONObje
 			// step through keys which represent a node inside the output element
 			for(final String valueElementName : values.keySet()) {
 				String[] outputPath = valueElementName.split("\\.");
-				this.jsonUtils.insertField(outputElement, outputPath, values.get(valueElementName));				
+				try {
+                    this.jsonUtils.insertField(outputElement, outputPath, values.get(valueElementName));
+                } catch (Exception e) {
+                    LOG.error("Failed to insert field '"+values.get(valueElementName)+"'. Reason: " + e.getMessage());
+                }	
+				
+				
+				
+				
+				
 			}			
 		}
 		
